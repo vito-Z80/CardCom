@@ -1,6 +1,9 @@
+import androidx.compose.ui.text.capitalize
+
 object Message {
     const val EMPTY = ""
     const val UNDEFINED = "undefined"
+    const val CLEAR = "Clear"
     const val NAN = "Nan"
     const val STRUCTURE = "Structure"
     const val PLAYER = "Player"
@@ -10,9 +13,15 @@ object Message {
 }
 
 
+//enum class EffectVariant {
+//    GENERAL,
+//    SWITCH;
+//    fun text() = name.lowercase().replaceFirstChar { it.uppercase() }
+//}
+
 val effectVariantList = listOf(
     "General",
-    "Grab",
+//    "Grab",
     "Switch",
 )
 
@@ -38,7 +47,8 @@ val signs = listOf(
     ">=",
     "<=",
 )
-val numbers = List<String>(101) {
-    if (it == 0) Message.NAN
-    else (it - 1).toString()
+val numbers = List<String>(200) {
+    if (it < 100) (-(100 - it)).toString()
+    else if (it > 100) (+(it - 101)).toString()
+    else Message.NAN
 }

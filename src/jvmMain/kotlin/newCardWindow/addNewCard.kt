@@ -1,22 +1,13 @@
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogState
@@ -24,9 +15,8 @@ import androidx.compose.ui.window.WindowPosition
 import file.getImageByPath
 import file.getImagePath
 import gson.NewCard
-import kotlinx.coroutines.withContext
 import newCardWindow.confirmNewCardWindow
-import newCardWindow.mainEffect
+import newCardWindow.generalEffect
 import newCardWindow.specials
 
 @Composable
@@ -65,6 +55,7 @@ fun newCardDialog(card: NewCard? = NewCard()) {
             modifier = Modifier.border(width = 1f.dp, color = Color.Black, shape = AbsoluteRoundedCornerShape(12.dp)),
         ) {
 
+//            inputDigit()
             Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(4f.dp)) {
 
                 LazyColumn(modifier = Modifier.weight(1f).padding(4f.dp)) {
@@ -120,7 +111,7 @@ fun newCardDialog(card: NewCard? = NewCard()) {
                             inputCardCost(newCard!!)
                             specials(newCard)
 
-                            mainEffect(newCard)
+                            generalEffect(newCard)
                             condition(newCard)
                         }
 

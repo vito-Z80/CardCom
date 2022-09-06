@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import button
 import gson.NewCard
 
 
@@ -57,7 +58,7 @@ fun specials(newCard: NewCard?) {
                     specialsCheckBox(newCard, SpecialsName.NOT_DISCARD)
                 }
                 Divider()
-                Text(text = "Clear", modifier = Modifier.clickable { clear = true })
+                button(text = Message.CLEAR, onClick = {clear = true})
             }
         }
     }

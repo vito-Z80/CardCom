@@ -1,7 +1,6 @@
 package newCardWindow
 
 
-import Message
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -19,17 +18,13 @@ import button
 import effect
 import effectVariantList
 import gson.NewCard
-import numbers
-import players
-import popupButton
-import structures
 
 /**
  * основной эффект по описанию карты
  */
 
 @Composable
-fun mainEffect(newCard: NewCard?) {
+fun generalEffect(newCard: NewCard?) {
 
     var contentVisible by remember { mutableStateOf(false) }
     var clear by remember { mutableStateOf(false) }
@@ -60,52 +55,29 @@ fun mainEffect(newCard: NewCard?) {
 
         AnimatedVisibility(visible = contentVisible, modifier = Modifier) {
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-
+            Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
                 Divider()
-
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-
-                        newCard?.effects?.value?.forEachIndexed { index, eff ->
-
-                            Row {
-                                effect(newCard,eff)
-//                                effectVariant(eff)
-                                plusMinusButton(newCard, index)
-                            }
+                    newCard?.effects?.value?.forEachIndexed { index, eff ->
+                        Row {
+                            effect(newCard, eff)
+                            plusMinusButton(newCard, index)
                         }
-                        if (newCard?.effects?.value.isNullOrEmpty()) {
-                            plusMinusButton(newCard)
-                        }
+                    }
+                    if (newCard?.effects?.value.isNullOrEmpty()) {
+                        plusMinusButton(newCard)
                     }
                 }
                 Divider()
-                Text(text = "Clear", modifier = Modifier.clickable { clear = true })
+                button(text = Message.CLEAR, onClick = {clear = true})
             }
 
         }
     }
 }
-
-@Composable
-fun effectVariant(effect: NewCard.Effect?) {
-    Column(verticalArrangement = Arrangement.Center) {
-        effectVariantList.forEach {
-            button(
-                text = fun () = it,
-                onClick = fun (){effect?.variant?.value = it}
-            )
-        }
-    }
-}
-
 
 @Composable
 private fun plusMinusButton(

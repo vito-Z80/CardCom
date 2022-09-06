@@ -2,20 +2,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PlatformTextInputService
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TextInputService
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import gson.NewCard
@@ -76,13 +86,13 @@ fun popupButton(
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 @Composable
 fun button(
-    text: () -> String,
+    text: String,
     onClick: () -> Unit,
     fontSize: Float = 18f,
     enabled: MutableState<Boolean> = mutableStateOf(true)
 ) {
     Text(
-        text = text.invoke(),
+        text = text,
         modifier = Modifier
             .padding(4f.dp)
             .defaultMinSize(96f.dp, 20f.dp)
@@ -131,67 +141,48 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
         }
     }
 
-    Column(verticalArrangement = Arrangement.Center) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ClickableText(
-                text = AnnotatedString(eff?.variant?.value ?: effectVariantList[0]),
-                modifier = Modifier
-                    .rotate(-90f)
-                    .textVertical(),
-                style = TextStyle(color = Color.Blue),
-                onClick = {
-                    expander = true
-                }
-            )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ClickableText(
+            text = AnnotatedString(eff?.variant?.value ?: effectVariantList[0]),
+            modifier = Modifier
+                .rotate(-90f)
+                .textVertical(),
+            style = TextStyle(color = Color.Blue),
+            onClick = {
+                expander = true
+            }
+        )
 
-            Column(verticalArrangement = Arrangement.Center) {
-
-                Row {
-                    popupButton(
-                        card = card,
-                        items = players,
-                        text = fun() = eff?.player?.value ?: Message.EMPTY,
-                        popupClickable = fun(s: String) { eff?.player?.value = s },
-                    )
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        text = Message.PLAYER,
-                        fontSize = 12.sp,
-                    )
-                }
-
-                Row {
-                    popupButton(
-                        card = card,
-                        items = structures,
-                        text = fun() = eff?.structure?.value ?: Message.EMPTY,
-                        popupClickable = fun(s: String) { eff?.structure?.value = s },
-                    )
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        text = Message.STRUCTURE,
-                        fontSize = 12.sp,
-                    )
-                }
-
-                Row {
-                    popupButton(
-                        card = card,
-                        items = numbers,
-                        text = fun() = eff?.value?.value ?: Message.NAN,
-                        popupClickable = fun(s: String) { eff?.value?.value = s },
-                    )
-                    Text(
-                        modifier = Modifier.align(Alignment.CenterVertically),
-                        text = Message.VALUE,
-                        fontSize = 12.sp,
-                    )
-                }
+        Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
+            if (eff?.variant?.value == effectVariantList[1]) {
+                effectLabel(card, eff.structure, structures, Message.STRUCTURE, Message.EMPTY)
+            } else {
+                effectLabel(card, eff?.player, players, Message.PLAYER, Message.EMPTY)
+                effectLabel(card, eff?.structure, structures, Message.STRUCTURE, Message.EMPTY)
+                effectLabel(card, eff?.value, numbers, Message.VALUE, Message.NAN)
             }
         }
 
     }
 }
+
+@Composable
+fun effectLabel(card: NewCard?, value: MutableState<String?>?, items: List<String>, text: String, emptyText: String) {
+    Row {
+        popupButton(
+            card = card,
+            items = items,
+            text = fun() = value?.value ?: emptyText,
+            popupClickable = fun(s: String) { value?.value = s },
+        )
+        Text(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            text = text,
+            fontSize = 12.sp,
+        )
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  https://stackoverflow.com/questions/70057396/how-to-show-vertical-text-with-proper-size-layout-in-jetpack-compose
@@ -205,3 +196,29 @@ fun Modifier.textVertical() =
             )
         }
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+@Composable
+fun inputDigit() {
+
+    val text: MutableState<String?> = remember { mutableStateOf(null) }
+
+    OutlinedTextField(
+        value = "${text.value}",
+        onValueChange = { text.value = it },
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+            .requiredWidth(96f.dp)
+            .height(40f.dp)
+    )
+
+    val outline = Outline.Rectangle(Rect(0f, 10f, 10f, 10f))
+
+
+//    TextField(
+//        value = "${text.value}",
+//        onValueChange = { text.value = it },
+//        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+//        shape = RectangleShape //.createOutline(Size(128f,24f),LayoutDirection.Ltr, Density(1f))
+//    )
+}

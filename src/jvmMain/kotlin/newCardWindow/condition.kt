@@ -99,31 +99,30 @@ fun condition(newCard: NewCard?) {
                 // condition false effects
                 conditionResult(newCard, newCard?.condition?.value?.conditionFalse)
                 Divider()
-                Text(text = "Clear", modifier = Modifier.clickable { clear = true })
+                button(text = Message.CLEAR, onClick = {clear = true})
             }
 
         }
     }
 }
 
-
-@Composable
-fun conditionType(newCard: NewCard?) {
-
-    val text = remember { mutableStateOf(Message.EMPTY) }
-
-    Column(verticalArrangement = Arrangement.SpaceEvenly) {
-        Row(horizontalArrangement = Arrangement.Center) {
-
-            popupButton(
-                newCard,
-                effectVariantList,
-                fun() =  text.value,
-                fun (t:String) {text.value = t}
-                )
-        }
-    }
-}
+//@Composable
+//fun conditionType(newCard: NewCard?) {
+//
+//    val text = remember { mutableStateOf(Message.EMPTY) }
+//
+//    Column(verticalArrangement = Arrangement.SpaceEvenly) {
+//        Row(horizontalArrangement = Arrangement.Center) {
+//
+//            popupButton(
+//                newCard,
+//                effectVariantList,
+//                fun() =  text.value,
+//                fun (t:String) {text.value = t}
+//                )
+//        }
+//    }
+//}
 
 
 @Composable
@@ -147,7 +146,7 @@ fun conditionResult(newCard: NewCard?, effect: MutableState<List<NewCard.Effect?
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
-        conditionType(newCard)
+//        conditionType(newCard)
         Row(
             modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
             horizontalArrangement = Arrangement.SpaceEvenly,
