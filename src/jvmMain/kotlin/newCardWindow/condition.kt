@@ -137,10 +137,6 @@ fun elseLabel() {
 
 @Composable
 fun conditionResult(newCard: NewCard?, effect: MutableState<List<NewCard.Effect?>?>?) {
-    // TODO эфекты в результатах условий должны иметь 3 вариации:
-    //  обычные     general     player gems +3
-    //  присвоение  grab        player quarry = enemy quarry
-    //  обмен       switch      switch players magic / exchange walls of players
 
     if (newCard == null) return
     Row(
@@ -243,7 +239,7 @@ private fun part(
             players,
             fun() = side?.value?.get(0)?.player?.value ?: Message.EMPTY,
             fun(s: String) { side?.value?.get(0)?.player?.value = s },
-            enabled = if (card?.condition?.value?.leftPart == side) mutableStateOf(true) else enabled
+            enabled = mutableStateOf(side?.value?.get(0)?.value?.value.isNullOrEmpty())
         )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
@@ -258,7 +254,7 @@ private fun part(
             structures,
             fun() = side?.value?.get(0)?.structure?.value ?: Message.EMPTY,
             fun(s: String) { side?.value?.get(0)?.structure?.value = s },
-            enabled = if (card?.condition?.value?.leftPart == side) mutableStateOf(true) else enabled
+            enabled = mutableStateOf(side?.value?.get(0)?.value?.value.isNullOrEmpty())
         )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
@@ -268,24 +264,7 @@ private fun part(
         )
     }
     if (side != card?.condition?.value?.leftPart) {
-        Row(horizontalArrangement = Arrangement.SpaceAround) {
-            popupButton(
-                card = card,
-                items = numbers,
-                text = fun(): String {
-                    val message = side?.value?.get(0)?.value?.value ?: Message.NAN
-                    enabled.value = message.contains(numbers[0])
-                    return message
-                },
-                popupClickable = fun(s: String) { side?.value?.get(0)?.value?.value = s }
-            )
-            Text(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                text = Message.VALUE,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Right
-            )
-        }
+        inputDigit(side?.value?.get(0)?.value)
     }
 }
 

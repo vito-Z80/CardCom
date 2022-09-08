@@ -2,34 +2,28 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PlatformTextInputService
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TextInputService
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import gson.NewCard
 
+
+val buttonSize = Size(96f, 20f)
 
 /**
  *  кнопка с всплывающим списком
@@ -143,7 +137,8 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         ClickableText(
-            text = AnnotatedString(eff?.variant?.value ?: effectVariantList[0]),
+            // "variant" is "Undefined" = "General"
+            text = AnnotatedString(eff?.variant?.value ?: Message.UNDEFINED),
             modifier = Modifier
                 .rotate(-90f)
                 .textVertical(),
@@ -154,12 +149,12 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
         )
 
         Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-            if (eff?.variant?.value == effectVariantList[1]) {
-                effectLabel(card, eff.structure, structures, Message.STRUCTURE, Message.EMPTY)
-            } else {
+            if (eff?.variant?.value == null || eff.variant.value == effectVariantList[0]) {
                 effectLabel(card, eff?.player, players, Message.PLAYER, Message.EMPTY)
                 effectLabel(card, eff?.structure, structures, Message.STRUCTURE, Message.EMPTY)
-                effectLabel(card, eff?.value, numbers, Message.VALUE, Message.NAN)
+                inputDigit(eff?.value)
+            } else {
+                effectLabel(card, eff.structure, structures, Message.STRUCTURE, Message.EMPTY)
             }
         }
 
@@ -198,27 +193,43 @@ fun Modifier.textVertical() =
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+private val reg2 = Regex("(?=[^-=+0-9])")
+
 @Composable
-fun inputDigit() {
+fun inputDigit(inputText: MutableState<String?>?) {
 
-    val text: MutableState<String?> = remember { mutableStateOf(null) }
+    var error by remember { mutableStateOf(false) }
+    // TODO error должен влиять на все окно создания карты (нельзя создать карту если есть ошибки в вводах)
 
-    OutlinedTextField(
-        value = "${text.value}",
-        onValueChange = { text.value = it },
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier
-            .requiredWidth(96f.dp)
-            .height(40f.dp)
-    )
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+        BasicTextField(
+            value = inputText?.value ?: Message.EMPTY,
+            onValueChange = { it ->
+                inputText?.value = it
+                error = reg2.containsMatchIn(it)
+            },
+            singleLine = true,
+            maxLines = 1,
+            modifier = Modifier
+                .padding(4f.dp)
 
-    val outline = Outline.Rectangle(Rect(0f, 10f, 10f, 10f))
-
-
-//    TextField(
-//        value = "${text.value}",
-//        onValueChange = { text.value = it },
-//        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-//        shape = RectangleShape //.createOutline(Size(128f,24f),LayoutDirection.Ltr, Density(1f))
-//    )
+                .size(96f.dp, 20f.dp)
+                .border(
+                    width = 1f.dp, color = if (error) {
+                        Color.Red
+                    } else {
+                        Color.Green
+                    }
+                )
+                .background(color = Color.LightGray)
+                .padding(2f.dp)
+        )
+        Text(
+            modifier = Modifier.align(Alignment.CenterVertically).padding(start = 4f.dp),
+            text = Message.VALUE,
+            fontSize = 12.sp,
+        )
+    }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

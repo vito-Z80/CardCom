@@ -5,9 +5,14 @@ import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogState
@@ -19,6 +24,7 @@ import newCardWindow.confirmNewCardWindow
 import newCardWindow.generalEffect
 import newCardWindow.specials
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun newCardDialog(card: NewCard? = NewCard()) {
 
@@ -44,7 +50,16 @@ fun newCardDialog(card: NewCard? = NewCard()) {
         undecorated = true,
         transparent = true,
         state = DialogState(position = WindowPosition(Alignment.Center), width = 768f.dp, height = 512f.dp),
-//        onKeyEvent = { it.key == Key.Escape }
+        onKeyEvent = {
+            if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
+                newCard = null
+                AppData.tmpCard = null
+                AppData.showCardDialog = false
+                true
+            } else {
+                false
+            }
+        }
 
     ) {
 
@@ -104,7 +119,7 @@ fun newCardDialog(card: NewCard? = NewCard()) {
                         }
 
 
-                        items(1){
+                        items(1) {
 
                             inputCardName(newCard!!)
                             inputCardDescription(newCard!!)

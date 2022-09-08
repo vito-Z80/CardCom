@@ -2,7 +2,7 @@ import androidx.compose.ui.text.capitalize
 
 object Message {
     const val EMPTY = ""
-    const val UNDEFINED = "undefined"
+    const val UNDEFINED = "Undefined"
     const val CLEAR = "Clear"
     const val NAN = "Nan"
     const val STRUCTURE = "Structure"
@@ -12,17 +12,17 @@ object Message {
 
 }
 
-
-//enum class EffectVariant {
-//    GENERAL,
-//    SWITCH;
-//    fun text() = name.lowercase().replaceFirstChar { it.uppercase() }
-//}
-
 val effectVariantList = listOf(
-    "General",
-//    "Grab",
-    "Switch",
+    //  +7 Wall, 6 damage to enemy, Magic = 3
+    "General",          // операции с ресурсами (+-=) где = обозначает что кол-во ресурса заменяется новым количеством.
+    //  Switch your wall with enemy wall
+    "Switch",           // обмен ресурсами
+    //  All player's magic equals the highest player's magic
+    "Highest",          // выравнивание ресурсов (ресурсы обоих игроков выравниваются по наивысшему показателю)
+    //  противоположное от Highest
+    "Lowest",           // выравнивание ресурсов (ресурсы обоих игроков выравниваются по наименьшему показателю)
+    //  типа: все кирпичи оппонента отсыпаются игроку (исключить либо очень редкие карты. Так-же ресурсов не может быть < 1)
+    "Appropriate",      // присвоить ресурс оппонента
 )
 
 val players = listOf(
@@ -47,8 +47,3 @@ val signs = listOf(
     ">=",
     "<=",
 )
-val numbers = List<String>(200) {
-    if (it < 100) (-(100 - it)).toString()
-    else if (it > 100) (+(it - 101)).toString()
-    else Message.NAN
-}

@@ -17,13 +17,6 @@ object AppData {
 
     var cards: List<NewCard?>? by mutableStateOf(null)  // массив карт
 
-    var popupPosition by mutableStateOf(DpOffset(0f.dp, 0f.dp))
-
-    var specialsSelect: String? by mutableStateOf(null)
-
-
-    // clears data
-    var clearConditionsData by mutableStateOf(false)
 
 }
 
