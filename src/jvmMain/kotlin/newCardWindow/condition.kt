@@ -1,8 +1,10 @@
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import gson.NewCard
+import newCardWindow.generalEffect
 
 @Composable
 fun condition(newCard: NewCard?) {
@@ -36,21 +39,17 @@ fun condition(newCard: NewCard?) {
             .padding(4f.dp)
     ) {
         Button(onClick = {
-            if (newCard?.condition?.value == null) {
-                newCard?.condition?.value = NewCard.Condition()
-            } else {
-                // восстановить параметры при редактировании
-
-            }
             contentVisible = !contentVisible
-
+            if (contentVisible && newCard?.condition?.value == null) {
+                newCard?.condition?.value = NewCard.Condition()
+            }
         }) {
             Text(text = "Condition")
         }
 
         AnimatedVisibility(visible = contentVisible, modifier = Modifier) {
             // CONDITION
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
 
                 Row(
@@ -89,41 +88,19 @@ fun condition(newCard: NewCard?) {
                         }
                     }
                 }
-                Divider()
                 // condition true effects
-                conditionResult(newCard, newCard?.condition?.value?.conditionTrue)
-                Divider()
+                generalEffect(newCard,newCard?.condition?.value?.conditionTrue, "Ture")
                 // ELSE
                 elseLabel()
-                Divider()
                 // condition false effects
-                conditionResult(newCard, newCard?.condition?.value?.conditionFalse)
-                Divider()
-                button(text = Message.CLEAR, onClick = {clear = true})
+                generalEffect(newCard,newCard?.condition?.value?.conditionFalse, "False")
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
+                    button(text = Message.CLEAR, onClick = { clear = true })
+                }
             }
-
         }
     }
 }
-
-//@Composable
-//fun conditionType(newCard: NewCard?) {
-//
-//    val text = remember { mutableStateOf(Message.EMPTY) }
-//
-//    Column(verticalArrangement = Arrangement.SpaceEvenly) {
-//        Row(horizontalArrangement = Arrangement.Center) {
-//
-//            popupButton(
-//                newCard,
-//                effectVariantList,
-//                fun() =  text.value,
-//                fun (t:String) {text.value = t}
-//                )
-//        }
-//    }
-//}
-
 
 @Composable
 fun elseLabel() {
@@ -136,93 +113,9 @@ fun elseLabel() {
 }
 
 @Composable
-fun conditionResult(newCard: NewCard?, effect: MutableState<List<NewCard.Effect?>?>?) {
-
-    if (newCard == null) return
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-//        conditionType(newCard)
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-
-            effect?.value?.forEachIndexed { index, eff ->
-
-                Row {
-                    effect(newCard, eff)
-                    plusMinusButton(newCard, effect, index)
-                }
-            }
-            if (effect?.value.isNullOrEmpty()) {
-                plusMinusButton(newCard, effect)
-            }
-        }
-    }
-}
-
-@Composable
-private fun plusMinusButton(
-    card: NewCard?,
-    effect: MutableState<List<NewCard.Effect?>?>?,
-    index: Int = -1
-) {
-
-    if (card == null) return
-
-
-    Column(verticalArrangement = Arrangement.Center) {
-
-        if (
-            effect?.value.isNullOrEmpty() ||
-            index == effect?.value?.lastIndex ||
-            index < 0
-        ) {
-            Text(
-                text = "+",
-                modifier = Modifier
-                    .padding(4f.dp)
-                    .defaultMinSize(20f.dp, 20f.dp)
-                    .background(Color.LightGray)
-                    .border(1f.dp, Color.DarkGray)
-                    .clickable {
-                        effect?.value =
-                            listOf(
-                                *effect?.value?.plus(NewCard.Effect())
-                                    ?.toTypedArray()
-                                    ?: listOf(NewCard.Effect()).toTypedArray()
-                            )
-
-                    },
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center,
-            )
-        }
-        //  -  во всех случаях кроме случая когда эфектов нет
-        if (!effect?.value.isNullOrEmpty()) {
-            Text(
-                text = "-",
-                modifier = Modifier
-                    .padding(4f.dp)
-                    .defaultMinSize(20f.dp, 20f.dp)
-                    .background(Color.LightGray)
-                    .border(1f.dp, Color.DarkGray)
-                    .clickable {
-
-                    },
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
-}
-
-
-@Composable
 private fun part(
     card: NewCard?,
-    side: MutableState<List<NewCard.Effect?>?>?,
+    partEffect: MutableState<List<NewCard.Effect?>?>?,
     enabled: MutableState<Boolean> = mutableStateOf(true)
 ) {
 
@@ -237,9 +130,9 @@ private fun part(
         popupButton(
             card,
             players,
-            fun() = side?.value?.get(0)?.player?.value ?: Message.EMPTY,
-            fun(s: String) { side?.value?.get(0)?.player?.value = s },
-            enabled = mutableStateOf(side?.value?.get(0)?.value?.value.isNullOrEmpty())
+            fun() = partEffect?.value?.get(0)?.player?.value ?: Message.EMPTY,
+            fun(s: String) { partEffect?.value?.get(0)?.player?.value = s },
+            enabled = mutableStateOf(partEffect?.value?.get(0)?.value?.value.isNullOrEmpty())
         )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
@@ -252,9 +145,9 @@ private fun part(
         popupButton(
             card,
             structures,
-            fun() = side?.value?.get(0)?.structure?.value ?: Message.EMPTY,
-            fun(s: String) { side?.value?.get(0)?.structure?.value = s },
-            enabled = mutableStateOf(side?.value?.get(0)?.value?.value.isNullOrEmpty())
+            fun() = partEffect?.value?.get(0)?.structure?.value ?: Message.EMPTY,
+            fun(s: String) { partEffect?.value?.get(0)?.structure?.value = s },
+            enabled = mutableStateOf(partEffect?.value?.get(0)?.value?.value.isNullOrEmpty())
         )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
@@ -263,8 +156,8 @@ private fun part(
             textAlign = TextAlign.Right
         )
     }
-    if (side != card?.condition?.value?.leftPart) {
-        inputDigit(side?.value?.get(0)?.value)
+    if (partEffect != card?.condition?.value?.leftPart) {
+        inputDigit(partEffect?.value?.get(0)?.value)
     }
 }
 

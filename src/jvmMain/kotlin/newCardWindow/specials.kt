@@ -38,10 +38,10 @@ fun specials(newCard: NewCard?) {
             .padding(4f.dp)
     ) {
         Button(onClick = {
-            if (newCard?.specials?.value == null) {
+            contentVisible = !contentVisible
+            if (contentVisible && newCard?.specials?.value == null) {
                 newCard?.specials?.value = NewCard.Special()
             }
-            contentVisible = !contentVisible
         }) {
             Text(text = "Specials")
         }
@@ -60,7 +60,7 @@ fun specials(newCard: NewCard?) {
                     specialsCheckBox(newCard, SpecialsName.NOT_DISCARD)
                 }
                 Divider()
-                button(text = Message.CLEAR, onClick = {clear = true})
+                button(text = Message.CLEAR, onClick = { clear = true })
             }
         }
     }
@@ -73,17 +73,13 @@ private fun specialsCheckBox(newCard: NewCard?, paramName: SpecialsName) {
 
     var selected by remember { mutableStateOf(false) }
 
-    // восстановить значения при редактрировании карты
-    if (newCard?.specials?.value != null) {
-        selected = when (paramName) {
-            SpecialsName.PLAY_AGAIN -> newCard.specials.value?.playAgain?.value ?: false
-            SpecialsName.DRAW -> newCard.specials.value?.drop?.value ?: false
-            SpecialsName.NOT_DISCARD -> newCard.specials.value?.notDiscard?.value ?: false
-            SpecialsName.DISCARD -> newCard.specials.value?.discard?.value ?: false
-        }
-    } else {
-        newCard?.specials?.value = NewCard.Special()
+    selected = when (paramName) {
+        SpecialsName.PLAY_AGAIN -> newCard?.specials?.value?.playAgain?.value ?: false
+        SpecialsName.DRAW -> newCard?.specials?.value?.drop?.value ?: false
+        SpecialsName.NOT_DISCARD -> newCard?.specials?.value?.notDiscard?.value ?: false
+        SpecialsName.DISCARD -> newCard?.specials?.value?.discard?.value ?: false
     }
+
 
     Text(text = paramName.name, modifier = Modifier.padding(8f.dp).padding(start = 8.dp, end = 2.dp))
 

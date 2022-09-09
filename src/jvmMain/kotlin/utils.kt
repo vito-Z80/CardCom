@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.sp
 import gson.NewCard
 
 
-val buttonSize = Size(96f, 20f)
+class Index(val id: Int)
+
 
 /**
  *  кнопка с всплывающим списком
@@ -154,7 +155,7 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
                 effectLabel(card, eff?.structure, structures, Message.STRUCTURE)
                 inputDigit(eff?.value)
             } else if (eff.variant.value == effectVariantList[4]) {
-                eff.player.value = "Enemy"
+                eff.player.value = players[1]
                 effectLabel(card, eff.player, players, Message.PLAYER, mutableStateOf(false))
                 effectLabel(card, eff.structure, structures, Message.STRUCTURE)
                 inputDigit(eff.value)

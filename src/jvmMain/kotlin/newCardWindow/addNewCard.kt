@@ -126,7 +126,7 @@ fun newCardDialog(card: NewCard? = NewCard()) {
                             inputCardCost(newCard!!)
                             specials(newCard)
 
-                            generalEffect(newCard)
+                            generalEffect(newCard, newCard?.effects, "Effects")
                             condition(newCard)
                         }
 
