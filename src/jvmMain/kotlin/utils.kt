@@ -150,25 +150,36 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
 
         Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
             if (eff?.variant?.value == null || eff.variant.value == effectVariantList[0]) {
-                effectLabel(card, eff?.player, players, Message.PLAYER, Message.EMPTY)
-                effectLabel(card, eff?.structure, structures, Message.STRUCTURE, Message.EMPTY)
+                effectLabel(card, eff?.player, players, Message.PLAYER)
+                effectLabel(card, eff?.structure, structures, Message.STRUCTURE)
                 inputDigit(eff?.value)
+            } else if (eff.variant.value == effectVariantList[4]) {
+                eff.player.value = "Enemy"
+                effectLabel(card, eff.player, players, Message.PLAYER, mutableStateOf(false))
+                effectLabel(card, eff.structure, structures, Message.STRUCTURE)
+                inputDigit(eff.value)
             } else {
-                effectLabel(card, eff.structure, structures, Message.STRUCTURE, Message.EMPTY)
+                effectLabel(card, eff.structure, structures, Message.STRUCTURE)
             }
         }
-
     }
 }
 
 @Composable
-fun effectLabel(card: NewCard?, value: MutableState<String?>?, items: List<String>, text: String, emptyText: String) {
+fun effectLabel(
+    card: NewCard?,
+    value: MutableState<String?>?,
+    items: List<String>,
+    text: String,
+    enabled: MutableState<Boolean> = mutableStateOf(true)
+) {
     Row {
         popupButton(
             card = card,
             items = items,
-            text = fun() = value?.value ?: emptyText,
+            text = fun() = value?.value ?: Message.EMPTY,
             popupClickable = fun(s: String) { value?.value = s },
+            enabled = enabled
         )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),

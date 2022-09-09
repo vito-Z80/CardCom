@@ -1,5 +1,7 @@
 package newCardWindow
 
+import Message
+import SpecialsName
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -54,7 +56,7 @@ fun specials(newCard: NewCard?) {
                 ) {
                     specialsCheckBox(newCard, SpecialsName.PLAY_AGAIN)
                     specialsCheckBox(newCard, SpecialsName.DISCARD)
-                    specialsCheckBox(newCard, SpecialsName.DROP)
+                    specialsCheckBox(newCard, SpecialsName.DRAW)
                     specialsCheckBox(newCard, SpecialsName.NOT_DISCARD)
                 }
                 Divider()
@@ -66,13 +68,6 @@ fun specials(newCard: NewCard?) {
 
 }
 
-enum class SpecialsName {
-    PLAY_AGAIN,
-    DROP,
-    NOT_DISCARD,
-    DISCARD
-}
-
 @Composable
 private fun specialsCheckBox(newCard: NewCard?, paramName: SpecialsName) {
 
@@ -82,7 +77,7 @@ private fun specialsCheckBox(newCard: NewCard?, paramName: SpecialsName) {
     if (newCard?.specials?.value != null) {
         selected = when (paramName) {
             SpecialsName.PLAY_AGAIN -> newCard.specials.value?.playAgain?.value ?: false
-            SpecialsName.DROP -> newCard.specials.value?.drop?.value ?: false
+            SpecialsName.DRAW -> newCard.specials.value?.drop?.value ?: false
             SpecialsName.NOT_DISCARD -> newCard.specials.value?.notDiscard?.value ?: false
             SpecialsName.DISCARD -> newCard.specials.value?.discard?.value ?: false
         }
@@ -97,7 +92,7 @@ private fun specialsCheckBox(newCard: NewCard?, paramName: SpecialsName) {
             selected = it
             when (paramName) {
                 SpecialsName.PLAY_AGAIN -> newCard?.specials?.value?.playAgain?.value = it
-                SpecialsName.DROP -> newCard?.specials?.value?.drop?.value = it
+                SpecialsName.DRAW -> newCard?.specials?.value?.drop?.value = it
                 SpecialsName.NOT_DISCARD -> newCard?.specials?.value?.notDiscard?.value = it
                 SpecialsName.DISCARD -> newCard?.specials?.value?.discard?.value = it
             }
