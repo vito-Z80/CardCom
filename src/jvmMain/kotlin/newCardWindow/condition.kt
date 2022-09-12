@@ -77,7 +77,7 @@ fun condition(newCard: NewCard?) {
                         Column(verticalArrangement = Arrangement.Center) {
                             popupButton(
                                 card = newCard,
-                                items = signs,
+                                items = Sign.values().map { it.name() },
                                 text = fun() = newCard?.condition?.value?.sign?.value ?: Message.SIGN,
                                 popupClickable = fun(s: String) { newCard?.condition?.value?.sign?.value = s },
                                 fontSize = 32f
@@ -89,11 +89,11 @@ fun condition(newCard: NewCard?) {
                     }
                 }
                 // condition true effects
-                generalEffect(newCard,newCard?.condition?.value?.conditionTrue, "Ture")
+                generalEffect(newCard, newCard?.condition?.value?.conditionTrue, "Ture")
                 // ELSE
                 elseLabel()
                 // condition false effects
-                generalEffect(newCard,newCard?.condition?.value?.conditionFalse, "False")
+                generalEffect(newCard, newCard?.condition?.value?.conditionFalse, "False")
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
                     button(text = Message.CLEAR, onClick = { clear = true })
                 }
@@ -129,14 +129,14 @@ private fun part(
     Row(horizontalArrangement = Arrangement.SpaceAround) {
         popupButton(
             card,
-            players,
+            Player.values().map { it.name() },
             fun() = partEffect?.value?.get(0)?.player?.value ?: Message.EMPTY,
             fun(s: String) { partEffect?.value?.get(0)?.player?.value = s },
             enabled = mutableStateOf(partEffect?.value?.get(0)?.value?.value.isNullOrEmpty())
         )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
-            text = Message.PLAYER,
+            text = Player.PLAYER.name(),
             fontSize = 12.sp,
             textAlign = TextAlign.Right
         )
@@ -144,7 +144,7 @@ private fun part(
     Row(horizontalArrangement = Arrangement.SpaceAround) {
         popupButton(
             card,
-            structures,
+            Structure.values().map { it.name() },
             fun() = partEffect?.value?.get(0)?.structure?.value ?: Message.EMPTY,
             fun(s: String) { partEffect?.value?.get(0)?.structure?.value = s },
             enabled = mutableStateOf(partEffect?.value?.get(0)?.value?.value.isNullOrEmpty())

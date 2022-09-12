@@ -2,11 +2,13 @@ package gson
 
 import AppData
 import Message
+import Player
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import cardImages
 import com.google.gson.Gson
+import name
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.impl.Log
 import java.io.File
@@ -255,7 +257,7 @@ class NewCard {
         var variant: MutableState<String?> = mutableStateOf(null)
 
         fun clear() {
-            player.value = Message.PLAYER
+            player.value = Player.PLAYER.name()
             structure.value = Message.STRUCTURE
             value.value = Message.NAN
         }
