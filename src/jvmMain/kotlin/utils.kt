@@ -4,10 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -156,7 +153,13 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
                 inputDigit(eff?.value)
             } else if (eff.variant.value == Variant.GET_HALF.name()) {
                 eff.player.value = Player.ENEMY.name()
-                effectLabel(card, eff.player, Player.values().map { it.name() }, Player.PLAYER.name(), mutableStateOf(false))
+                effectLabel(
+                    card,
+                    eff.player,
+                    Player.values().map { it.name() },
+                    Player.PLAYER.name(),
+                    mutableStateOf(false)
+                )
                 effectLabel(card, eff.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
                 inputDigit(eff.value)
             } else {
@@ -242,6 +245,18 @@ fun inputDigit(inputText: MutableState<String?>?) {
             fontSize = 12.sp,
         )
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@Composable
+fun ZxText(text: String, onClick: () -> Unit) {
+    
+    Text(text = text, style = MaterialTheme.typography.h6, modifier = Modifier
+        .clickable { onClick.invoke() }
+    )
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

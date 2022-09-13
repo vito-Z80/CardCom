@@ -60,6 +60,15 @@ private fun cardToSerialize(card: NewCard): SerializedCard {
     serializedCard.cardDescription = card.cardDescription.value
     serializedCard.cardName = card.cardName.value
     serializedCard.imagePath = card.imagePath.value
+//    serializedCard.zxCard = card.zxCard.value
+
+    serializedCard.zxCard?.name = card.zxCard.value?.name?.value
+    serializedCard.zxCard?.description = card.zxCard.value?.description?.value
+    serializedCard.zxCard?.sprite = card.zxCard.value?.sprite?.value
+    serializedCard.zxCard?.attributes = card.zxCard.value?.attributes?.value
+    serializedCard.zxCard?.spriteBlock8 = card.zxCard.value?.spriteBlock8?.value
+
+
     if (!card.effects.value.isNullOrEmpty()) {
         serializedCard.effects = List(card.effects.value?.size ?: 0) {
             val e = SerializedCard.Effect()
@@ -151,6 +160,16 @@ private fun cardToDeserialize(serializedCard: SerializedCard): NewCard {
     newCards.cardDescription.value = serializedCard.cardDescription
     newCards.cardName.value = serializedCard.cardName
     newCards.imagePath.value = serializedCard.imagePath
+
+
+    // TODO ZxCard не десериализуется
+    newCards.zxCard.value?.name?.value = serializedCard.zxCard?.name
+    newCards.zxCard.value?.description?.value = serializedCard.zxCard?.description
+    newCards.zxCard.value?.sprite?.value = serializedCard.zxCard?.sprite
+    newCards.zxCard.value?.attributes?.value = serializedCard.zxCard?.attributes
+    newCards.zxCard.value?.spriteBlock8?.value = serializedCard.zxCard?.spriteBlock8
+
+
     if (!serializedCard.effects.isNullOrEmpty()) {
         newCards.effects.value = List(serializedCard.effects?.size ?: 0) {
             val e = NewCard.Effect()
@@ -235,6 +254,8 @@ class NewCard {
     var effects: MutableState<List<Effect?>?> = mutableStateOf(null)
     var condition: MutableState<Condition?> = mutableStateOf(null)
 
+    var zxCard: MutableState<ZxCard?> = mutableStateOf(null)
+
     class Special {
         var playAgain: MutableState<Boolean?> = mutableStateOf(null)
         var drop: MutableState<Boolean?> = mutableStateOf(null)
@@ -262,6 +283,14 @@ class NewCard {
             value.value = Message.NAN
         }
     }
+
+    class ZxCard {
+        var name: MutableState<String?> = mutableStateOf(null)
+        var description: MutableState<String?> = mutableStateOf(null)
+        var sprite: MutableState<ByteArray?> = mutableStateOf(null)
+        var spriteBlock8: MutableState<List<ByteArray?>?> = mutableStateOf(null)
+        var attributes: MutableState<ByteArray?> = mutableStateOf(null)
+    }
 }
 
 /**
@@ -278,6 +307,8 @@ class SerializedCard {
 
     var effects: List<Effect?>? = null
     var condition: Condition? = null
+
+    var zxCard: SerializedZxCard? = null
 
     class Special {
         var playAgain: Boolean? = null
@@ -298,9 +329,19 @@ class SerializedCard {
         var player: String? = null
         var structure: String? = null
         var value: String? = null
-        var variant:String? = null
+        var variant: String? = null
+    }
+
+    class SerializedZxCard {
+        var name: String? = null
+        var description: String? = null
+        var sprite: ByteArray? = null
+        var spriteBlock8: List<ByteArray?>? = null
+        var attributes: ByteArray? = null
     }
 }
+
+
 
 
 

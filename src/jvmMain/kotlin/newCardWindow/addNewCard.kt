@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.WindowPosition
+import convert.textVisualization
 import file.getImageByPath
 import file.getImagePath
 import gson.NewCard
@@ -128,6 +129,7 @@ fun newCardDialog(card: NewCard? = NewCard()) {
 
                             generalEffect(newCard, newCard?.effects, "Effects")
                             condition(newCard)
+                            textVisualization(newCard)
                         }
 
                     }

@@ -9,12 +9,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import mainMenu.mainMenu
+import theme.MyTheme
 
 @Composable
 fun App() {
     remember { AppData }
 
-    MaterialTheme {
+    MyTheme {
 
         if (AppData.showCardDialog) {
             newCardDialog(AppData.tmpCard)
