@@ -60,8 +60,8 @@ private fun cardToSerialize(card: NewCard): SerializedCard {
     serializedCard.cardDescription = card.cardDescription.value
     serializedCard.cardName = card.cardName.value
     serializedCard.imagePath = card.imagePath.value
-//    serializedCard.zxCard = card.zxCard.value
 
+    if (serializedCard.zxCard == null) serializedCard.zxCard = SerializedCard.SerializedZxCard()
     serializedCard.zxCard?.name = card.zxCard.value?.name?.value
     serializedCard.zxCard?.description = card.zxCard.value?.description?.value
     serializedCard.zxCard?.sprite = card.zxCard.value?.sprite?.value
@@ -161,8 +161,7 @@ private fun cardToDeserialize(serializedCard: SerializedCard): NewCard {
     newCards.cardName.value = serializedCard.cardName
     newCards.imagePath.value = serializedCard.imagePath
 
-
-    // TODO ZxCard не десериализуется
+    if (newCards.zxCard.value == null) newCards.zxCard = mutableStateOf(NewCard.ZxCard())
     newCards.zxCard.value?.name?.value = serializedCard.zxCard?.name
     newCards.zxCard.value?.description?.value = serializedCard.zxCard?.description
     newCards.zxCard.value?.sprite?.value = serializedCard.zxCard?.sprite
