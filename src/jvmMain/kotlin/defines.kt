@@ -1,3 +1,6 @@
+import androidx.compose.ui.graphics.Color
+import java.util.*
+
 object Message {
     const val EMPTY = ""
     const val UNDEFINED = "Undefined"
@@ -61,3 +64,5 @@ fun Sign.name() = when (this) {
     Sign.LESS_E -> "<="
     else -> error("No have this sign ${this.name}")
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////

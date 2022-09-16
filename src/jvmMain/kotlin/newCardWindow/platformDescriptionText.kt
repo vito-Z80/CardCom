@@ -1,37 +1,28 @@
-@file:OptIn(ExperimentalComposeUiApi::class)
-
-package convert
+package newCardWindow
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import button
 import gson.NewCard
 
 @Composable
-fun textVisualization(card: NewCard?) {
-
+fun platformDescriptionText(card: NewCard?) {
 
     if (card == null) return
-
-
 
     if (card.zxCard.value == null) {
         card.zxCard.value = NewCard.ZxCard()
     }
-
 
     Column(
         modifier = Modifier
@@ -61,5 +52,4 @@ fun textVisualization(card: NewCard?) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
         )
     }
-
 }

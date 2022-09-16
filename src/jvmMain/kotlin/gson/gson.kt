@@ -57,6 +57,7 @@ class DesCards : ArrayList<SerializedCard>()
 private fun cardToSerialize(card: NewCard): SerializedCard {
     val serializedCard = SerializedCard()
     serializedCard.cardCost = card.cardCost.value
+    serializedCard.costCurrency = card.costCurrency.value
     serializedCard.cardDescription = card.cardDescription.value
     serializedCard.cardName = card.cardName.value
     serializedCard.imagePath = card.imagePath.value
@@ -159,6 +160,7 @@ private fun cardToDeserialize(serializedCard: SerializedCard): NewCard {
     newCards.cardCost.value = serializedCard.cardCost
     newCards.cardDescription.value = serializedCard.cardDescription
     newCards.cardName.value = serializedCard.cardName
+    newCards.costCurrency.value = serializedCard.costCurrency
     newCards.imagePath.value = serializedCard.imagePath
 
     if (newCards.zxCard.value == null) newCards.zxCard = mutableStateOf(NewCard.ZxCard())
@@ -247,6 +249,7 @@ class NewCard {
     var cardName: MutableState<String?> = mutableStateOf(null)
     var cardDescription: MutableState<String?> = mutableStateOf(null)
     var cardCost: MutableState<String?> = mutableStateOf(null)
+    var costCurrency: MutableState<String?> = mutableStateOf(null)
 
     var specials: MutableState<Special?> = mutableStateOf(null)
 
@@ -301,6 +304,7 @@ class SerializedCard {
     var cardName: String? = null
     var cardDescription: String? = null
     var cardCost: String? = null
+    var costCurrency: String? = null
 
     var specials: Special? = null
 

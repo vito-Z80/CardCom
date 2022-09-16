@@ -5,7 +5,10 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import gson.*
+import org.jetbrains.skia.ColorSpace
+import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
+import org.jetbrains.skia.SamplingMode
 import org.jetbrains.skia.impl.Log
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
