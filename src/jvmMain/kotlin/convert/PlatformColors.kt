@@ -32,14 +32,14 @@ object PlatformColor {
             set(Color(colors[0]).green, 4)
             zxColor = zxColor or (c shl 3)
         } else {
-            set(Color(colors[0]).blue, 1)
-            set(Color(colors[0]).red, 2)
-            set(Color(colors[0]).green, 4)
+            set(Color(colors[0]).blue, 1 shl 3)
+            set(Color(colors[0]).red, 2 shl 3)
+            set(Color(colors[0]).green, 4 shl 3)
             val c = zxColor
             set(Color(colors[1]).blue, 1)
             set(Color(colors[1]).red, 2)
             set(Color(colors[1]).green, 4)
-            zxColor = zxColor or (c shl 3)
+            zxColor = zxColor or c
         }
 
         return (zxColor or bright).toByte()

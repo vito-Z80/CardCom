@@ -17,6 +17,7 @@ object AppData {
 
     var cards: List<NewCard?>? by mutableStateOf(null)  // массив карт
 
+    var convert by mutableStateOf(false)
 
 }
 

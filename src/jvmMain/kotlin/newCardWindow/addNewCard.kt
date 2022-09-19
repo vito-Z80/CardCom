@@ -78,9 +78,12 @@ fun newCardDialog(card: NewCard? = NewCard()) {
                             newCard?.imagePath?.value = getImagePath()
                             cardImages[newCard?.imagePath?.value] = getImageByPath()
                             tryLoadImage = false
-                            val spr = PlatformSprite.asSpriteSymbols(newCard?.imagePath?.value)
-                            newCard?.zxCard?.value?.spriteBlock8?.value = spr?.first
-                            newCard?.zxCard?.value?.attributes?.value = spr?.second
+//                            val spr = PlatformSprite.asSpriteSymbols(newCard?.imagePath?.value)
+//                            newCard?.zxCard?.value?.spriteBlock8?.value = spr?.first
+//                            newCard?.zxCard?.value?.attributes?.value = spr?.second
+//
+//                            val r = PlatformSprite.spriteToAsm(moduleName = "CARD",spriteSymbols = spr?.first, attributes = spr?.second)
+//                            println(r)
                         }
 
                         item {

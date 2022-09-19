@@ -39,7 +39,7 @@ fun popupButton(
     text: () -> String,
     popupClickable: (s: String) -> Unit,
     fontSize: Float = 18f,
-    enabled: MutableState<Boolean> = mutableStateOf(true)
+    enabled: MutableState<Boolean> = mutableStateOf(true),
 ) {
     var visible by remember { mutableStateOf(false) }
 
@@ -81,7 +81,7 @@ fun button(
     text: String,
     onClick: () -> Unit,
     fontSize: Float = 18f,
-    enabled: MutableState<Boolean> = mutableStateOf(true)
+    enabled: MutableState<Boolean> = mutableStateOf(true),
 ) {
     Text(
         text = text,
@@ -175,7 +175,7 @@ fun effectLabel(
     value: MutableState<String?>?,
     items: List<String>,
     text: String,
-    enabled: MutableState<Boolean> = mutableStateOf(true)
+    enabled: MutableState<Boolean> = mutableStateOf(true),
 ) {
     Row {
         popupButton(
@@ -251,12 +251,15 @@ fun inputDigit(inputText: MutableState<String?>?) {
 
 @Composable
 fun ZxText(text: String, onClick: () -> Unit) {
-    
+
     Text(text = text, style = MaterialTheme.typography.h6, modifier = Modifier
         .clickable { onClick.invoke() }
     )
 
 
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+fun hex2(char: Char) = "#" + String.format("%02X", char.code)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

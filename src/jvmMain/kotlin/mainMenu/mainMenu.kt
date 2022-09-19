@@ -1,5 +1,6 @@
 package mainMenu
 
+import AppData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import convert.PlatformSprite
 import file.loadTemplate
 import file.saveTemplate
 import kotlin.system.exitProcess
@@ -47,6 +49,14 @@ fun mainMenu() {
 @Composable
 fun popupCardMenu(expand: MutableState<Boolean>) {
 
+    LaunchedEffect(AppData.convert){
+        if (AppData.convert) {
+            AppData.convert = false
+            val result = PlatformSprite.convert("CARD")
+            println(result)
+        }
+    }
+
     DropdownMenu(expanded = expand.value, onDismissRequest = { expand.value = false }) {
         DropdownMenuItem(onClick = {
             expand.value = false
@@ -57,6 +67,7 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
 
         DropdownMenuItem(onClick = {
             expand.value = false
+            AppData.convert = true
         }) {
             Text(text = "Convert")
         }
