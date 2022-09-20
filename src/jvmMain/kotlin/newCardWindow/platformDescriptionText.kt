@@ -43,7 +43,7 @@ fun platformDescriptionText(card: NewCard?) {
             },
             modifier = Modifier
                 .padding(4f.dp)
-                .border(width = 8f.dp, color = Color.DarkGray)
+                .border(width = 8f.dp, color = Color.Black)
                 .padding(8f.dp)
                 .width((16 * 8).dp)
                 .height((10 * 8).dp)

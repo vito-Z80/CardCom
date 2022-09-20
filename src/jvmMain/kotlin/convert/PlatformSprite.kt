@@ -4,6 +4,7 @@ import AppData
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
 import cardImages
+import toLink
 import java.util.*
 
 object PlatformSprite {
@@ -19,7 +20,7 @@ object PlatformSprite {
     val asmText = StringBuilder()
 
 
-    fun convert(moduleName: String?): String {
+    fun convert(moduleName: String? = null): String {
         spriteMap.clear()
         spriteData.clear()
         asmText.clear()
@@ -27,7 +28,7 @@ object PlatformSprite {
         AppData.cards?.forEachIndexed { id, card ->
 
             val pixelMap = cardImages[card?.imagePath?.value]?.toPixelMap()
-            val spriteName = card?.cardName?.value?.uppercase()?.replace(" ", "_")
+            val spriteName = card?.cardName?.value?.toLink()
             val data = asSpriteSymbols(pixelMap)
             val code = spriteToAsm(
                 spriteName = spriteName,

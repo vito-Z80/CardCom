@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import convert.PlatformSprite
+import convert.PlatformText
 import file.loadTemplate
 import file.saveTemplate
 import kotlin.system.exitProcess
@@ -52,8 +52,11 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
     LaunchedEffect(AppData.convert){
         if (AppData.convert) {
             AppData.convert = false
-            val result = PlatformSprite.convert("CARD")
-            println(result)
+            val sprites = PlatformSprite.convert("CARD")
+            val text = PlatformText.convert()
+            println(sprites)
+            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
+            println(text)
         }
     }
 

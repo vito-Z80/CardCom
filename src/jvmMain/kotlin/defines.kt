@@ -1,6 +1,3 @@
-import androidx.compose.ui.graphics.Color
-import java.util.*
-
 object Message {
     const val EMPTY = ""
     const val UNDEFINED = "Undefined"
@@ -21,8 +18,11 @@ enum class SpecialsName {
 }
 
 enum class Variant {
-    //  +7 Wall, 6 damage to enemy, Magic = 3
-    GENERAL,        // операции с ресурсами (+-=) где = обозначает что кол-во ресурса заменяется новым количеством.
+    //  +7 Wall, 6 damage to enemy
+    GENERAL,        // операции с ресурсами (+-)
+
+    //  Magic = 3
+    ASSIGN,         // присвоить ресурсу новое значение
 
     //  Switch your wall with enemy wall
     SWITCH,         // обмен ресурсами
@@ -37,7 +37,9 @@ enum class Variant {
     GET_HALF,       // когда враг теряет ресурсы, игрок получает половину от них (округление вверх)
 
     //  типа: все кирпичи оппонента отсыпаются игроку (исключить, либо очень редкие карты. Так-же ресурсов не может быть < 1)
-    APPROPRIATE     // присвоить ресурс оппонента
+    SEIZE     // завладеть ресурсом оппонента
+
+
 }
 
 enum class Player {

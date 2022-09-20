@@ -147,7 +147,7 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
         )
 
         Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-            if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL.name()) {
+            if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL.name() || eff.variant.value == Variant.ASSIGN.name()) {
                 effectLabel(card, eff?.player, Player.values().map { it.name() }, Player.PLAYER.name())
                 effectLabel(card, eff?.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
                 inputDigit(eff?.value)
@@ -208,7 +208,8 @@ fun Modifier.textVertical() =
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-private val reg2 = Regex("(?=[^-=+0-9])")
+// TODO любые символы после цифр должны быть ошибкой
+private val reg2 = Regex("(?=[^-+0-9])")
 
 @Composable
 fun inputDigit(inputText: MutableState<String?>?) {
@@ -262,4 +263,5 @@ fun ZxText(text: String, onClick: () -> Unit) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 fun hex2(char: Char) = "#" + String.format("%02X", char.code)
 
+fun String.toLink() = uppercase().replace(" ", "_")
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
