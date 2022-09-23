@@ -99,21 +99,137 @@ object PlatformLogic {
 
 
     /*
+
+        struct player
+        PLAYER      0
+        ENEMY       1
+        ALL         2
+        ends
+
+        struct structure
+        WALL        0
+        TOWER       1
+        QUARRY      2
+        BRICKS      3
+        MAGIC       4
+        GEMS        5
+        DUNGEON     6
+        RECRUITS    7
+
+        struct card_action
+        EFFECT      0
+        CONDITION   1
+        SPECIALS    2
+        ends
+
+        struct effect_variant
+        GENERAL     0
+        ASSIGN      1
+        SWITCH      2
+        HIGHEST     4
+        LOWEST      8
+        GET_HALF    16
+        SEIZE       32
+        ends
+
+
     6 Damage. All players lose 5 bricks, gems and recruits
 
     data:
-        general,wall,enemy,-6
+        card_action.EFFECT,general,enemy,wall,-6
         5,all,bricks
         5,all,gems
         5,all,recruits
 
     cardCode:
         ld hl,data
-        call effectCode
-        call effectCode
-        call effectCode
+        call logic
+        call logic
+        call logic
         jp effectCode
 
+
+logic:
+        ld a,(hl)       ; card action
+        inc hl
+        or a
+        jr z,exe_effect
+        rrca
+        jr c,exe_condition
+        rrca
+        je c,exe_specials
+        ret
+
+exe_effect:
+        ld a,(hl)       ; effect variant
+        inc hl
+        or a
+        jr z,effect_general
+        rrca
+        jr c,effect_assign
+        rrca
+        jr c,effect_switch
+        rrca
+        jr c,effect_highest
+        rrca
+        jr c,effect_lowest
+        rrca
+        jr c,effect_get_half
+        rrca
+        jr c,effect_seize
+        ret
+effect_general:
+        ld a,(hl)       ; player
+        inc hl
+        or a
+        jr z,effect_general_player
+        rrca
+        jr c,effect_general_enemy
+        rrca
+        ret nc
+        ; for all players
+        push hl
+        call effect_general_player
+        pop hl
+        jp effect_general_enemy
+
+effect_general_enemy:
+        ld a,(hl)       ; structure
+        inc hl
+        ld (eec1 + 3),a
+        ld (eec2 + 3),a
+        jr effect_enemy_calc
+
+effect_enemy_calc:
+        ld a,(hl)       ; value (max = #20)
+.eec1:
+        ld a,(ix + 0)
+        ld c,a
+        ld a,(hl)       ; ; value (max = -#20 +#20)
+        cp #80
+        jr nc,.minus
+        add c
+        jr nc,.eec2
+        ld a,#FF
+.eec2:
+        ld (ix + 0),a
+        jr run
+.minus:
+        neg
+        ld b,a
+        ld a,c
+        sub b
+        jr z,.l4
+        jr nc,.eec2
+.l4:
+        ld a,1
+        jr .eec2
+
+
+
+
+
+        //////////////////////////////////////////////////////////////////////////////
 effectCode:
         ld a,(hl)   ; variant
         cp general
@@ -151,6 +267,12 @@ set_structure:
         ld (effect + 4),a
         ld (eff + 4),a
         ret
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////
+
 
      */
 

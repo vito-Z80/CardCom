@@ -11,6 +11,7 @@ object Message {
 fun Enum<*>.name() = name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
 
 enum class SpecialsName {
+    // 0,1,2,4
     PLAY_AGAIN,
     DRAW,
     `CAN'T_DISCARD`,
@@ -18,6 +19,8 @@ enum class SpecialsName {
 }
 
 enum class Variant {
+    // 0,1,2,4,8,16,32,64
+
     //  +7 Wall, 6 damage to enemy
     GENERAL,        // операции с ресурсами (+-)
 
@@ -39,18 +42,29 @@ enum class Variant {
     //  типа: все кирпичи оппонента отсыпаются игроку (исключить, либо очень редкие карты. Так-же ресурсов не может быть < 1)
     SEIZE     // завладеть ресурсом оппонента
 
+}
 
+class Action {
+
+    companion object {
+        const val EFFECT = 0
+        const val CONDITION = 1
+        const val SPECIALS = 2
+    }
 }
 
 enum class Player {
+    // 0,1,2
     PLAYER, ENEMY, ALL
 }
 
 enum class Structure {
+    // 0,1,2,3,4,5,6,7
     WALL, TOWER, QUARRY, BRICKS, MAGIC, GEMS, DUNGEON, RECRUITS
 }
 
 enum class Sign {
+    // 0,1,2,4,8
     LESS,
     MORE,
     EQUAL,
