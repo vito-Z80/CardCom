@@ -1,7 +1,7 @@
 package newCardWindow
 
 import Message
-import SpecialsName
+import Specials
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -55,10 +55,10 @@ fun specials(newCard: NewCard?) {
                         .horizontalScroll(ScrollState(0)),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    specialsCheckBox(newCard, SpecialsName.PLAY_AGAIN)
-                    specialsCheckBox(newCard, SpecialsName.DISCARD)
-                    specialsCheckBox(newCard, SpecialsName.DRAW)
-                    specialsCheckBox(newCard, SpecialsName.`CAN'T_DISCARD`)
+                    specialsCheckBox(newCard, Specials.PLAY_AGAIN)
+                    specialsCheckBox(newCard, Specials.DISCARD)
+                    specialsCheckBox(newCard, Specials.DRAW)
+                    specialsCheckBox(newCard, Specials.`CAN'T_DISCARD`)
                 }
                 Divider()
                 button(text = Message.CLEAR, onClick = { clear = true })
@@ -70,29 +70,24 @@ fun specials(newCard: NewCard?) {
 }
 
 @Composable
-private fun specialsCheckBox(newCard: NewCard?, paramName: SpecialsName) {
+private fun specialsCheckBox(newCard: NewCard?, paramName: Specials) {
 
     var selected by remember { mutableStateOf(false) }
 
-    selected = when (paramName) {
-        SpecialsName.PLAY_AGAIN -> newCard?.specials?.value?.playAgain?.value ?: false
-        SpecialsName.DRAW -> newCard?.specials?.value?.drop?.value ?: false
-        SpecialsName.`CAN'T_DISCARD` -> newCard?.specials?.value?.notDiscard?.value ?: false
-        SpecialsName.DISCARD -> newCard?.specials?.value?.discard?.value ?: false
+    LaunchedEffect(selected){
+        when (paramName) {
+            Specials.PLAY_AGAIN -> newCard?.specials?.value?.playAgain?.value = selected
+            Specials.DRAW -> newCard?.specials?.value?.draw?.value = selected
+            Specials.`CAN'T_DISCARD` -> newCard?.specials?.value?.notDiscard?.value = selected
+            Specials.DISCARD -> newCard?.specials?.value?.discard?.value = selected
+        }
     }
-
 
     Row {
         Text(text = paramName.name(), modifier = Modifier.padding(8f.dp).padding(start = 8.dp, end = 2.dp))
         Checkbox(
             checked = selected, onCheckedChange = {
                 selected = it
-                when (paramName) {
-                    SpecialsName.PLAY_AGAIN -> newCard?.specials?.value?.playAgain?.value = it
-                    SpecialsName.DRAW -> newCard?.specials?.value?.drop?.value = it
-                    SpecialsName.`CAN'T_DISCARD` -> newCard?.specials?.value?.notDiscard?.value = it
-                    SpecialsName.DISCARD -> newCard?.specials?.value?.discard?.value = it
-                }
             }, modifier = Modifier
                 .padding(8f.dp)
                 .size(16f.dp)

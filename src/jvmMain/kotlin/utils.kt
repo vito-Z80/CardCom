@@ -120,7 +120,7 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
         Variant.values().forEachIndexed { index, variant ->
             DropdownMenuItem(
                 onClick = {
-                    eff?.variant?.value = variant.name()
+                    eff?.variant?.value = variant//.name()
                     expander = false
                 },
                 modifier = Modifier
@@ -136,7 +136,7 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         ClickableText(
             // "variant" is "Undefined" = "General"
-            text = AnnotatedString(eff?.variant?.value ?: Message.UNDEFINED),
+            text = AnnotatedString(eff?.variant?.value?.name() ?: Message.UNDEFINED),
             modifier = Modifier
                 .rotate(-90f)
                 .textVertical(),
@@ -147,11 +147,11 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
         )
 
         Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-            if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL.name() || eff.variant.value == Variant.ASSIGN.name()) {
+            if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL || eff.variant.value == Variant.ASSIGN) {
                 effectLabel(card, eff?.player, Player.values().map { it.name() }, Player.PLAYER.name())
                 effectLabel(card, eff?.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
                 inputDigit(eff?.value)
-            } else if (eff.variant.value == Variant.GET_HALF.name()) {
+            } else if (eff.variant.value == Variant.GET_HALF) {
                 eff.player.value = Player.ENEMY.name()
                 effectLabel(
                     card,
@@ -263,5 +263,22 @@ fun ZxText(text: String, onClick: () -> Unit) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 fun hex2(char: Char) = "#" + String.format("%02X", char.code)
 
+fun Char.hex() = "#" + String.format("%02X", this.code)
+fun Byte.hex() = "#" + String.format("%02X", this)
+
 fun String.toLink() = uppercase().replace(" ", "_")
+
+fun String.toByte() = try {
+    this.toInt().toByte()
+} catch (e: Exception) {
+    null
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+fun Enum<*>.name() = name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+private val bits = listOf(1, 2, 4, 8, 16, 32, 64, 128)
+// 8 битное значение бита по его индексу с маской
+fun Int.bitValueByIndex() = bits.find { it == (this and 7) }!!
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import convert.PlatformLogic
 import convert.PlatformSprite
 import convert.PlatformText
 import file.loadTemplate
@@ -52,11 +53,15 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
     LaunchedEffect(AppData.convert){
         if (AppData.convert) {
             AppData.convert = false
-            val sprites = PlatformSprite.convert("CARD")
-            val text = PlatformText.convert()
+            val sprites = PlatformSprite.convert("CARD_SPRITE")
+            val text = PlatformText.convert("CARD_TEXT")
+            val logic = PlatformLogic.convert("CARD_LOGIC")
+
             println(sprites)
             println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
             println(text)
+            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
+            println(logic)
         }
     }
 

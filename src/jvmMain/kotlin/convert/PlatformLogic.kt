@@ -1,9 +1,15 @@
 package convert
 
+import Action
 import AppData
+import Player
+import Structure
 import Variant
+import androidx.compose.runtime.MutableState
 import gson.NewCard
-import name
+import hex
+import toByte
+import toLink
 
 
 object Tag {
@@ -57,223 +63,174 @@ general_effect:
 
 }
 
+private const val CALL_LOGIC = "\n\tcall logic"
+private const val PUSH_DE = "\n\tpush de"
+private const val RET = "\n\tret"
+
+private val logicData = StringBuilder()
+private val logicCode = StringBuilder()
+private val logicCodeMap = StringBuilder("\nmap:")
+private val asmCode = StringBuilder()
+
+const val MAX_VALUE: Byte = 32
+const val MAX_BYTE: Byte = 255.toByte()
+
 object PlatformLogic {
 
-    fun convert(moduleName: String? = null) {
+
+    fun convert(moduleName: String? = null): String {
 
 
         AppData.cards?.forEachIndexed { id, card ->
-
-
-            card?.effects?.value?.forEach { e ->
-
-                effect(e)
-                e?.variant?.value
-            }
-
+            PEffect.ef(card, card?.effects?.value)
+            PEffect.co(card, card?.condition)
+            PEffect.specials(card?.specials?.value)
         }
 
+
+
+        asmCode.insert(0, logicCodeMap)
+        asmCode.append(logicCode)
+
+        if (moduleName != null) {
+            asmCode.insert(0, "\tmodule $moduleName")
+            asmCode.append("\n\tendmodule")
+        }
+
+        return asmCode.toString()
     }
 
 
+}
+
+object PEffect {
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                         //
+    //                                   E F F E C T                                           //
+    //                                                                                         //
+    /////////////////////////////////////////////////////////////////////////////////////////////
     private fun effect(e: NewCard.Effect?) {
-        val data = StringBuilder()
         when (e?.variant?.value) {
-            Variant.GENERAL.name() -> {
-                generalEffect(e)
+            Variant.GENERAL, Variant.GET_HALF -> {
+                general(e)
             }
 
-            Variant.ASSIGN.name() -> {}
-            Variant.GET_HALF.name() -> {}
-            Variant.SEIZE.name() -> {}
-            Variant.HIGHEST.name() -> {}
-            Variant.LOWEST.name() -> {}
-            Variant.SWITCH.name() -> {}
+            Variant.ASSIGN -> {
+                assign(e)
+            }
+
+            Variant.SWITCH, Variant.SEIZE, Variant.HIGHEST, Variant.LOWEST -> {
+                switch(e)
+            }
+
+            else -> {}
         }
 
     }
 
-    private fun generalEffect(e: NewCard.Effect) {
+    private fun switch(e: NewCard.Effect) {
+        // action,variant,structure
+        logicData.append("\n\tdb ")
+        // card action
+        logicData.append("${Action.EFFECT.toByte().hex()},")
+        // effect variant
+        logicData.append("${Variant.values().indexOf(e.variant.value).toByte().hex()},")
+        // structure
+        logicData.append(Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.toByte().hex())
+        logicData.append("\t; effect")
+    }
+
+    private fun assign(e: NewCard.Effect) {
+        // action, variant, value, player, structure
+        logicData.append("\n\tdb ")
+        // card action
+        logicData.append("${Action.EFFECT.toByte().hex()},")
+        // effect variant
+        logicData.append("${Variant.values().indexOf(e.variant.value).toByte().hex()},")
+
+        val value = (e.value.value?.toByte() ?: 0xFF).toByte()
+        // value
+        logicData.append("${value.hex()},")
+        // player
+        logicData.append("${Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()},")
+        // structure
+        logicData.append(Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.toByte().hex())
+        logicData.append("\t; effect")
+    }
+
+    private fun general(e: NewCard.Effect) {
+        // action, variant, player, structure, value
+        logicData.append("\n\tdb ")
+        // card action
+        logicData.append("${Action.EFFECT.toByte().hex()},")
+        // effect variant
+        logicData.append("${Variant.values().indexOf(e.variant.value).toByte().hex()},")
+        // player
+        logicData.append("${Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()},")
+        // structure
+        logicData.append(
+            "${
+                Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.toByte().hex()
+            },"
+        )
+        // value
+        logicData.append(e.value.value?.toByte()?.hex() ?: error("Wrong value..."))
+        logicData.append("\t; effect")
+    }
+
+    fun ef(card: NewCard?, effects: List<NewCard.Effect?>?) {
+        if (!effects.isNullOrEmpty()) {
+            val link = card?.cardName?.value?.toLink() ?: error(" Wrong card link : $this")
+            logicCodeMap.append("\n\tdw $link")
+            logicCode.append("\n${link}:")
+            logicCode.append("\n\tld hl,${link}_DATA")
+            asmCode.append("\n${link}_DATA:")
+            println(effects.size)
+            effects.forEach { e ->
+                logicData.clear()
+                println(e?.player?.value)
+                println(e?.value?.value?.toByte()?.hex())
+                effect(e)
+                asmCode.append(logicData)
+                logicCode.append(PUSH_DE)
+            }
+            logicCode.append(RET)
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                         //
+    //                                 C O N D I T I O N                                       //
+    //                                                                                         //
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?) {
 
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                         //
+    //                                 S P E C I A L S                                         //
+    //                                                                                         //
+    /////////////////////////////////////////////////////////////////////////////////////////////
 
-    /*
-
-        struct player
-        PLAYER      0
-        ENEMY       1
-        ALL         2
-        ends
-
-        struct structure
-        WALL        0
-        TOWER       1
-        QUARRY      2
-        BRICKS      3
-        MAGIC       4
-        GEMS        5
-        DUNGEON     6
-        RECRUITS    7
-
-        struct card_action
-        EFFECT      0
-        CONDITION   1
-        SPECIALS    2
-        ends
-
-        struct effect_variant
-        GENERAL     0
-        ASSIGN      1
-        SWITCH      2
-        HIGHEST     4
-        LOWEST      8
-        GET_HALF    16
-        SEIZE       32
-        ends
-
-
-    6 Damage. All players lose 5 bricks, gems and recruits
-
-    data:
-        card_action.EFFECT,general,enemy,wall,-6
-        5,all,bricks
-        5,all,gems
-        5,all,recruits
-
-    cardCode:
-        ld hl,data
-        call logic
-        call logic
-        call logic
-        jp effectCode
-
-
-logic:
-        ld a,(hl)       ; card action
-        inc hl
-        or a
-        jr z,exe_effect
-        rrca
-        jr c,exe_condition
-        rrca
-        je c,exe_specials
-        ret
-
-exe_effect:
-        ld a,(hl)       ; effect variant
-        inc hl
-        or a
-        jr z,effect_general
-        rrca
-        jr c,effect_assign
-        rrca
-        jr c,effect_switch
-        rrca
-        jr c,effect_highest
-        rrca
-        jr c,effect_lowest
-        rrca
-        jr c,effect_get_half
-        rrca
-        jr c,effect_seize
-        ret
-effect_general:
-        ld a,(hl)       ; player
-        inc hl
-        or a
-        jr z,effect_general_player
-        rrca
-        jr c,effect_general_enemy
-        rrca
-        ret nc
-        ; for all players
-        push hl
-        call effect_general_player
-        pop hl
-        jp effect_general_enemy
-
-effect_general_enemy:
-        ld a,(hl)       ; structure
-        inc hl
-        ld (eec1 + 3),a
-        ld (eec2 + 3),a
-        jr effect_enemy_calc
-
-effect_enemy_calc:
-        ld a,(hl)       ; value (max = #20)
-.eec1:
-        ld a,(ix + 0)
-        ld c,a
-        ld a,(hl)       ; ; value (max = -#20 +#20)
-        cp #80
-        jr nc,.minus
-        add c
-        jr nc,.eec2
-        ld a,#FF
-.eec2:
-        ld (ix + 0),a
-        jr run
-.minus:
-        neg
-        ld b,a
-        ld a,c
-        sub b
-        jr z,.l4
-        jr nc,.eec2
-.l4:
-        ld a,1
-        jr .eec2
-
-
-
-
-
-        //////////////////////////////////////////////////////////////////////////////
-effectCode:
-        ld a,(hl)   ; variant
-        cp general
-        jr z,effectGeneral
-
-        ld e,(hl)   ; structure
-        inc hl
-        ld a,(hl)   ; player
-        inc hl
-        ld d,#IX
-        cp player
-        jr z,.l2
-        ld d,#IY
-        cp enemy
-        jp nz,ALL
-.l2:
-        ld (effect + 2),de
-        ld (eff + 2),de
-        call effect
-        inc hl
-        ret
-        //
-effect:
-        ld a,(# + structure)
-        add (hl)
-eff:
-        ld (ix + structure),a
-
-set_player:
-        ld a,(hl)
-        cp player
-
-set_structure:
-        ld a,(hl)
-        ld (effect + 4),a
-        ld (eff + 4),a
-        ret
-
-
-
-
-    /////////////////////////////////////////////////////////////////////////////////////
-
-
-     */
+    fun specials(specials: NewCard.Special?) {
+        logicData.clear()
+        if (specials == null) return
+        fun setSpec(specialIndex: Int) {
+            // card action,special value
+            logicData.append("\n\tdb ")
+            // card action
+            logicData.append("${Action.SPECIALS.toByte().hex()},")
+            logicData.append("${specialIndex.toByte().hex()}\t; special")
+        }
+        if (specials.playAgain.value == true) setSpec(0)
+        if (specials.draw.value == true) setSpec(1)
+        if (specials.notDiscard.value == true) setSpec(2)
+        if (specials.discard.value == true) setSpec(4)
+        logicCode.append(logicData)
+    }
 
 }

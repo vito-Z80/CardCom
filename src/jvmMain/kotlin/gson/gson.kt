@@ -3,6 +3,7 @@ package gson
 import AppData
 import Message
 import Player
+import Variant
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -85,7 +86,7 @@ private fun cardToSerialize(card: NewCard): SerializedCard {
             discard = card.specials.value?.discard?.value
             notDiscard = card.specials.value?.notDiscard?.value
             playAgain = card.specials.value?.playAgain?.value
-            drop = card.specials.value?.drop?.value
+            drop = card.specials.value?.draw?.value
         }
     }
     if (card.condition.value != null) {
@@ -186,7 +187,7 @@ private fun cardToDeserialize(serializedCard: SerializedCard): NewCard {
             discard.value = serializedCard.specials?.discard
             notDiscard.value = serializedCard.specials?.notDiscard
             playAgain.value = serializedCard.specials?.playAgain
-            drop.value = serializedCard.specials?.drop
+            draw.value = serializedCard.specials?.drop
         }
     }
     if (serializedCard.condition != null) {
@@ -260,7 +261,7 @@ class NewCard {
 
     class Special {
         var playAgain: MutableState<Boolean?> = mutableStateOf(null)
-        var drop: MutableState<Boolean?> = mutableStateOf(null)
+        var draw: MutableState<Boolean?> = mutableStateOf(null)
         var discard: MutableState<Boolean?> = mutableStateOf(null)
         var notDiscard: MutableState<Boolean?> = mutableStateOf(null)
     }
@@ -277,7 +278,7 @@ class NewCard {
         var player: MutableState<String?> = mutableStateOf(null)
         var structure: MutableState<String?> = mutableStateOf(null)
         var value: MutableState<String?> = mutableStateOf(null)
-        var variant: MutableState<String?> = mutableStateOf(null)
+        var variant: MutableState<Variant?> = mutableStateOf(null)
 
         fun clear() {
             player.value = Player.PLAYER.name()
@@ -332,7 +333,7 @@ class SerializedCard {
         var player: String? = null
         var structure: String? = null
         var value: String? = null
-        var variant: String? = null
+        var variant: Variant? = null
     }
 
     class SerializedZxCard {

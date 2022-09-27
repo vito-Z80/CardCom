@@ -8,9 +8,8 @@ object Message {
     const val SIGN = "Sign"
 }
 
-fun Enum<*>.name() = name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
 
-enum class SpecialsName {
+enum class Specials {
     // 0,1,2,4
     PLAY_AGAIN,
     DRAW,
