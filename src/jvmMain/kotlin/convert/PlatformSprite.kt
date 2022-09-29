@@ -4,7 +4,7 @@ import AppData
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
 import cardImages
-import toLink
+import toAsmLabel
 import java.util.*
 
 object PlatformSprite {
@@ -28,7 +28,7 @@ object PlatformSprite {
         AppData.cards?.forEachIndexed { id, card ->
 
             val pixelMap = cardImages[card?.imagePath?.value]?.toPixelMap()
-            val spriteName = card?.cardName?.value?.toLink()
+            val spriteName = card?.cardName?.value?.toAsmLabel()
             val data = asSpriteSymbols(pixelMap)
             val code = spriteToAsm(
                 spriteName = spriteName,

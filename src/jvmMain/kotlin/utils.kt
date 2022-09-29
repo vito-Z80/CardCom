@@ -9,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.AnnotatedString
@@ -210,6 +209,7 @@ fun Modifier.textVertical() =
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO любые символы после цифр должны быть ошибкой
 private val reg2 = Regex("(?=[^-+0-9])")
+val regOnlyDigit = Regex("[^0-9]")
 
 @Composable
 fun inputDigit(inputText: MutableState<String?>?) {
@@ -249,6 +249,34 @@ fun inputDigit(inputText: MutableState<String?>?) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+@Composable
+fun BasicInput(inputText: MutableState<String?>?, regex: Regex) {
+    var error by remember { mutableStateOf(false) }
+    BasicTextField(
+        value = inputText?.value ?: Message.EMPTY,
+        onValueChange = { it ->
+            inputText?.value = it
+            error = regex.containsMatchIn(it)
+        },
+        singleLine = true,
+        maxLines = 1,
+        modifier = Modifier
+            .padding(4f.dp)
+
+            .size(96f.dp, 20f.dp)
+            .border(
+                width = 1f.dp, color = if (error) {
+                    Color.Red
+                } else {
+                    Color.Green
+                }
+            )
+            .background(color = Color.LightGray)
+            .padding(2f.dp)
+    )
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @Composable
 fun ZxText(text: String, onClick: () -> Unit) {
@@ -266,7 +294,7 @@ fun hex2(char: Char) = "#" + String.format("%02X", char.code)
 fun Char.hex() = "#" + String.format("%02X", this.code)
 fun Byte.hex() = "#" + String.format("%02X", this)
 
-fun String.toLink() = uppercase().replace(" ", "_")
+fun String.toAsmLabel() = uppercase().replace(" ", "_")
 
 fun String.toByte() = try {
     this.toInt().toByte()
@@ -278,7 +306,7 @@ fun String.toByte() = try {
 fun Enum<*>.name() = name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-private val bits = listOf(1, 2, 4, 8, 16, 32, 64, 128)
+private val bits = listOf(0, 1, 2, 4, 8, 16, 32, 64)
 // 8 битное значение бита по его индексу с маской
-fun Int.bitValueByIndex() = bits.find { it == (this and 7) }!!
+fun Int.bitValueByIndex() = bits[this and 7]
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

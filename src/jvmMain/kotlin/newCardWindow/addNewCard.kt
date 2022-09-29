@@ -167,11 +167,10 @@ private fun inputCardCost(newCard: NewCard) {
         modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        OutlinedTextField(
-            value = newCard.cardCost.value ?: "",
-            onValueChange = { newCard.cardCost.value = it },
-            singleLine = true,
-            label = { Text("Card Cost") })
+        Row {
+            Text("Cost: ", modifier = Modifier.align(Alignment.CenterVertically))
+            BasicInput(newCard.cardCost, regOnlyDigit)
+        }
         Column(modifier = Modifier.align(Alignment.CenterVertically), verticalArrangement = Arrangement.Center) {
             popupButton(
                 card = newCard,

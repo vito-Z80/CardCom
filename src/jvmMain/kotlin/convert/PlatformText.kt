@@ -2,7 +2,7 @@ package convert
 
 import AppData
 import hex2
-import toLink
+import toAsmLabel
 
 object PlatformText {
 
@@ -30,8 +30,8 @@ object PlatformText {
         textData.clear()
 
         AppData.cards?.forEach {
-            textMap.append("\n\tdw ${it?.cardName?.value?.toLink()}")
-            textData.append("\n${it?.cardName?.value?.toLink()}:")
+            textMap.append("\n\tdw ${it?.cardName?.value?.toAsmLabel()}")
+            textData.append("\n${it?.cardName?.value?.toAsmLabel()}:")
             textData.append(toAsm(it?.cardName?.value, it?.zxCard?.value?.description?.value))
         }
 

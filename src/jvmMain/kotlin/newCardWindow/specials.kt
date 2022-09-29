@@ -72,7 +72,12 @@ fun specials(newCard: NewCard?) {
 @Composable
 private fun specialsCheckBox(newCard: NewCard?, paramName: Specials) {
 
-    var selected by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf(when (paramName) {
+        Specials.PLAY_AGAIN -> newCard?.specials?.value?.playAgain?.value ?: false
+        Specials.DRAW -> newCard?.specials?.value?.draw?.value ?: false
+        Specials.`CAN'T_DISCARD` -> newCard?.specials?.value?.notDiscard?.value ?: false
+        Specials.DISCARD -> newCard?.specials?.value?.discard?.value ?: false
+    }) }
 
     LaunchedEffect(selected){
         when (paramName) {
@@ -82,6 +87,7 @@ private fun specialsCheckBox(newCard: NewCard?, paramName: Specials) {
             Specials.DISCARD -> newCard?.specials?.value?.discard?.value = selected
         }
     }
+
 
     Row {
         Text(text = paramName.name(), modifier = Modifier.padding(8f.dp).padding(start = 8.dp, end = 2.dp))

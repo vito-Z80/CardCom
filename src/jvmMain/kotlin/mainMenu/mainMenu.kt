@@ -53,14 +53,14 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
     LaunchedEffect(AppData.convert){
         if (AppData.convert) {
             AppData.convert = false
-            val sprites = PlatformSprite.convert("CARD_SPRITE")
-            val text = PlatformText.convert("CARD_TEXT")
+//            val sprites = PlatformSprite.convert("CARD_SPRITE")
+//            val text = PlatformText.convert("CARD_TEXT")
+//
+//            println(sprites)
+//            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
+//            println(text)
+            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
             val logic = PlatformLogic.convert("CARD_LOGIC")
-
-            println(sprites)
-            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
-            println(text)
-            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
             println(logic)
         }
     }
