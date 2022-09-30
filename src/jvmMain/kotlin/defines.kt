@@ -68,7 +68,7 @@ enum class Sign {
     MORE,
     EQUAL,
     MORE_E,
-    LESS_E
+    LESS_E;
 }
 
 fun Sign.name() = when (this) {
@@ -79,5 +79,4 @@ fun Sign.name() = when (this) {
     Sign.LESS_E -> "<="
     else -> error("No have this sign ${this.name}")
 }
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

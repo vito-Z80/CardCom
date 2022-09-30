@@ -1,16 +1,16 @@
 package convert
 
-import Action
 import AppData
 import Player
+import Sign
 import Structure
 import Variant
 import androidx.compose.runtime.MutableState
 import bitValueByIndex
 import gson.NewCard
 import hex
-import toByte
 import toAsmLabel
+import toByte
 
 
 object Tag {
@@ -147,32 +147,25 @@ object PEffect {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun switch(e: NewCard.Effect) {
-        // action,variant,structure
+        // variant,structure
         logicData.append("\n\tdb ")
-        // card action
-//        logicData.append("${Action.EFFECT.toByte().hex()},")
-        // effect variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).toByte().hex()},")
+        // variant
+        logicData.append("${Variant.values().indexOf(e.variant.value).bitValueByIndex().toByte().hex()},")
         // structure
         logicData.append(
             Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
                 .hex()
         )
-        logicData.append("\t; effect")
+        logicData.append("\t; effect: ${e.variant.value}, ${e.structure.value}")
     }
 
     private fun assign(e: NewCard.Effect) {
-        // FIXME скорее всего от первых двух значенией можно будет отказаться. Делать вызовы опираясь на экшн и вариант.
-        //  сократятся данные в ассемблере + код
-        // action, variant, value, player, structure
+        // variant, value, player, structure
         logicData.append("\n\tdb ")
-        // card action
-//        logicData.append("${Action.EFFECT.toByte().hex()},")
         // effect variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).toByte().hex()},")
-
-        val value = (e.value.value?.toByte() ?: 0xFF).toByte()
+        logicData.append("${Variant.values().indexOf(e.variant.value).bitValueByIndex().toByte().hex()},")
         // value
+        val value = (e.value.value?.toByte() ?: 0xFF).toByte()
         logicData.append("${value.hex()},")
         // player
         logicData.append("${Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()},")
@@ -181,28 +174,27 @@ object PEffect {
             Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
                 .hex()
         )
-        logicData.append("\t; effect")
+        logicData.append("\t; effect: ${e.variant.value}, ${e.value.value}, ${e.player.value}, ${e.structure.value}")
     }
 
     private fun general(e: NewCard.Effect) {
         // action, variant, player, structure, value
         logicData.append("\n\tdb ")
-        // card action
-//        logicData.append("${Action.EFFECT.toByte().hex()},")
         // effect variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).toByte().hex()},")
+        val variant = Variant.values().indexOf(e.variant.value).bitValueByIndex().toByte().hex()
         // player
-        logicData.append("${Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()},")
+        val player = Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()
         // structure
-        logicData.append(
-            "${
-                Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
-                    .hex()
-            },"
-        )
+        val structure =
+            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
+                .hex()
         // value
-        logicData.append(e.value.value?.toByte()?.hex() ?: error("Wrong value..."))
-        logicData.append("\t; effect")
+        val value = e.value.value?.toByte()?.hex()
+        logicData.append("$variant,")
+        logicData.append("${player},")
+        logicData.append("$structure,")
+        logicData.append(value ?: error("Wrong value..."))
+        logicData.append("\t; effect: ${e.variant.value}, ${e.player.value}, ${e.structure.value}, ${e.value.value}")
     }
 
     fun ef(card: NewCard?, effects: List<NewCard.Effect?>?) {
@@ -237,6 +229,34 @@ object PEffect {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?) {
+        if (condition?.value == null) return
+        // value ?				    ; если == 255 то условие по значению структуры, иначе по value
+        // sign
+        // player, wall				; left part
+        // player, wall, +6 	    ; true
+        // player, wall, +3			; false
+
+        val value = (condition.value?.rightPart?.value?.get(0)?.value?.value ?: "255").toInt()
+
+        if (value == 255) {
+            // по значению структуры
+            conditionByStructure(condition.value!!)
+        } else {
+            // по значению value
+            conditionByValue(condition.value!!)
+        }
+
+    }
+
+    private fun conditionByStructure(condition: NewCard.Condition) {
+        val trueResult = condition.conditionTrue.value
+        val falseResult = condition.conditionFalse.value
+        val sign = Sign.values().indexOfFirst { it.name == condition.sign.value }.bitValueByIndex()
+        val left = condition.leftPart.value?.get(0)
+        val right = condition.rightPart.value?.get(0)
+    }
+
+    private fun conditionByValue(value: NewCard.Condition) {
 
     }
 
@@ -251,10 +271,8 @@ object PEffect {
         var specialCounter = 0
 
         fun setSpec(specialIndex: Int) {
-            // card action,special value
+            // special value
             logicData.append("\n\tdb ")
-            // card action
-//            logicData.append("${Action.SPECIALS.toByte().hex()},")
             logicData.append("${specialIndex.toByte().hex()}\t; special")
             specialCounter++
         }
