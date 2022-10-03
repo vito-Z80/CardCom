@@ -99,7 +99,7 @@ object PlatformLogic {
             logicCode.append("\n\tld hl,${label}_DATA")
             logicCode.append("\n\t$CALL_CHECK_COST_CURRENCY")
             PEffect.specials(card, card.specials.value)
-            PEffect.ef(card, card.effects.value)
+            PEffect.effect(card, card.effects.value)
             PEffect.co(card, card.condition)
             logicCode.append(RET)
         }
@@ -197,10 +197,9 @@ object PEffect {
         logicData.append("\t; effect: ${e.variant.value}, ${e.player.value}, ${e.structure.value}, ${e.value.value}")
     }
 
-    fun ef(card: NewCard?, effects: List<NewCard.Effect?>?) {
+    fun effect(card: NewCard?, effects: List<NewCard.Effect?>?) {
         if (!effects.isNullOrEmpty()) {
             effects.forEach { e ->
-//                logicData.clear()
                 when (e?.variant?.value) {
                     Variant.GENERAL, Variant.GET_HALF -> {
                         general(e)
@@ -230,35 +229,57 @@ object PEffect {
 
     fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?) {
         if (condition?.value == null) return
-        // value ?				    ; если == 255 то условие по значению структуры, иначе по value
+        // value берется с rightPart value и rightPart не используется если value != 255
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // value ?				            ; если value == 255 то условие по значению структуры, иначе по value
         // sign
-        // player, wall				; left part
-        // player, wall, +6 	    ; true
-        // player, wall, +3			; false
-
+        // player, structure				; left part
+        // player, structure                ; right part: присутствует только если value == 255
+        // player, structure, value 	    ; true content
+        // player, structure, value			; false content: если player == 255 то false content отсутствует
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         val value = (condition.value?.rightPart?.value?.get(0)?.value?.value ?: "255").toInt()
 
+        val trueContent = condition.value?.conditionTrue?.value
+        val falseContent = condition.value?.conditionFalse?.value
+        // FIXME sign хуйню считает выдет всегда #40 (it.name() мозгу пудрит)
+        val sign = Sign.values().indexOfFirst { it.name == condition.value?.sign?.value }.bitValueByIndex()
+        val left = condition.value?.leftPart?.value?.get(0)
+        val right = condition.value?.rightPart?.value?.get(0)
+        // value
+        logicData.append("\n\tdb ${value.toByte().hex()}\t; #FF by structure value else by value.")
+        // sign
+        logicData.append("\n\tdb ${sign.toByte().hex()}\t; sign ${condition.value?.sign?.value}")
+        // left part
+        val player = Player.values().indexOfFirst { it.name == left?.player?.value?.uppercase() }.toByte().hex()
+        logicData.append("\n\tdb $player\t; ${condition.value?.leftPart?.value?.get(0)?.player?.value}")
+        val structure =
+            Structure.values().indexOfFirst { it.name == left?.structure?.value?.uppercase() }.bitValueByIndex()
+                .toByte()
+                .hex()
+        logicData.append("\n\tdb $structure\t; ${condition.value?.leftPart?.value?.get(0)?.structure?.value}")
         if (value == 255) {
-            // по значению структуры
-            conditionByStructure(condition.value!!)
+            // right part
+            val playerR = Player.values().indexOfFirst { it.name == right?.player?.value?.uppercase() }.toByte().hex()
+            logicData.append("\n\tdb $playerR\t; ${condition.value?.rightPart?.value?.get(0)?.player?.value}")
+            val structureR =
+                Structure.values().indexOfFirst { it.name == right?.structure?.value?.uppercase() }.bitValueByIndex()
+                    .toByte()
+                    .hex()
+            logicData.append("\n\tdb $structureR\t; ${condition.value?.rightPart?.value?.get(0)?.structure?.value}")
+        }
+        // true content
+        effect(card, trueContent)
+        if (falseContent != null) {
+            // false content
+            effect(card, falseContent)
         } else {
-            // по значению value
-            conditionByValue(condition.value!!)
+            logicData.append("\n\tdb #FF\t; no false content in condition.")
         }
 
-    }
-
-    private fun conditionByStructure(condition: NewCard.Condition) {
-        val trueResult = condition.conditionTrue.value
-        val falseResult = condition.conditionFalse.value
-        val sign = Sign.values().indexOfFirst { it.name == condition.sign.value }.bitValueByIndex()
-        val left = condition.leftPart.value?.get(0)
-        val right = condition.rightPart.value?.get(0)
-    }
-
-    private fun conditionByValue(value: NewCard.Condition) {
 
     }
+
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                         //
