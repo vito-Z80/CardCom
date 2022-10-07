@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import cardImages
 import toAsmLabel
 import java.util.*
+import kotlin.collections.ArrayList
 
 object PlatformSprite {
 
@@ -19,24 +20,47 @@ object PlatformSprite {
     val spriteData = StringBuilder()
     val asmText = StringBuilder()
 
+    // binary for sprites only
+    val binaryData = ArrayList<Byte>()
+    val binaryMap = ArrayList<Byte>()
+    var binaryMapAddress = 0
 
     fun convert(moduleName: String? = null): String {
         spriteMap.clear()
         spriteData.clear()
         asmText.clear()
-
+        binaryData.clear()
+        binaryMap.clear()
+        // размер binaryMap = кол-во карт * 2 (2 байта на адрес)
+        // начало binaryData = С000 + binaryMap.size
+        binaryMapAddress = (AppData.cards?.size ?: 0) * 2 + 0xC000
         AppData.cards?.forEachIndexed { id, card ->
+            binaryMap.add(((binaryMapAddress shr 8) and 0xff).toByte())
+            binaryMap.add((binaryMapAddress and 0xff).toByte())
+
 
             val pixelMap = cardImages[card?.imagePath?.value]?.toPixelMap()
             val spriteName = card?.cardName?.value?.toAsmLabel()
             val data = asSpriteSymbols(pixelMap)
+            val d2 = asSprite(pixelMap)
+
             val code = spriteToAsm(
                 spriteName = spriteName,
                 attributes = data?.second,
-                spriteSymbols = data?.first
+//                spriteSymbols = data?.first,
+                sprite = d2?.first
             )
             spriteData.append(code)
             spriteMap.append("\n\tdw $spriteName")
+
+            // binary
+            data?.first?.forEach {
+                binaryData.addAll(it.toTypedArray())
+            }
+            let { data?.second }?.also {
+                binaryData.addAll(it.toTypedArray())
+            }
+            binaryMapAddress += binaryData.size
 
         }
 
@@ -59,12 +83,12 @@ object PlatformSprite {
     ): String {
         val spriteData = StringBuilder()
         if (sprite != null) {
-
-            for (i in 0..sprite.size step SYMBOL_SIZE) {
+            spriteData.append("\n$spriteName:")
+            for (i in sprite.indices step SYMBOL_SIZE) {
                 dbLine8(sprite.copyOfRange(i, i + SYMBOL_SIZE), spriteData)
             }
-
-            for (i in 0..(attributes?.size ?: 0) step SYMBOL_SIZE) {
+            spriteData.append("\n; attributes")
+            for (i in 0 until(attributes?.size ?: 0) step SYMBOL_SIZE) {
                 dbLine8(attributes?.copyOfRange(i, i + SYMBOL_SIZE), spriteData)
             }
 
@@ -95,14 +119,19 @@ object PlatformSprite {
         if (pm == null) return null
         val symbols = asSpriteSymbols(pm)!!
         val sprite = ArrayList<Byte>()
-        val range = 0..(pm.width / SYMBOL_SIZE) * (pm.height / SYMBOL_SIZE)
-        for (i in range step pm.width / SYMBOL_SIZE) {
-            repeat(SYMBOL_SIZE) { line ->
-                repeat(pm.width / SYMBOL_SIZE) { x ->
-                    val byte = symbols.first[i + x][line]
+        val width = pm.width / SYMBOL_SIZE
+        val height = pm.height / SYMBOL_SIZE
+
+
+        val range = 0 until (width * height)
+        for (i in range step height) {
+            repeat(SYMBOL_SIZE) {
+                repeat(width) { x ->
+                    val byte = symbols.first[i + x][it]
                     sprite.add(byte)
                 }
             }
+
         }
         return Pair(sprite.toByteArray(), symbols.second)
     }

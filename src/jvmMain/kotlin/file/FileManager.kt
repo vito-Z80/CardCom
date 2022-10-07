@@ -4,12 +4,11 @@ import AppData
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import convert.PlatformSprite
 import gson.*
-import org.jetbrains.skia.ColorSpace
-import org.jetbrains.skia.EncodedImageFormat
 import org.jetbrains.skia.Image
-import org.jetbrains.skia.SamplingMode
 import org.jetbrains.skia.impl.Log
+import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -106,5 +105,24 @@ fun loadTemplate() {
         } catch (e: Exception) {
             JOptionPane.showMessageDialog(window, "File ${chooser.selectedFile} can`t be loading.\nпачимута...")
         }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+fun saveData(sprites: String? = null, text: String, logic: String) {
+    try {
+        if (sprites != null) {
+            File("sprites.asm").writeText(sprites)
+        } else {
+            PlatformSprite.binaryMap.addAll(PlatformSprite.binaryData.toTypedArray())
+            File("sprite.bin").writeBytes(PlatformSprite.binaryMap.toByteArray())
+        }
+        File("text.asm").writeText(text)
+        File("logic.asm").writeText(logic)
+        JOptionPane.showMessageDialog(window, "ASM data be saved.")
+    } catch (e: FileSystemException) {
+        JOptionPane.showMessageDialog(window, "Files can`t be saved. пачимута...")
+        println(e)
+        e.printStackTrace()
     }
 }

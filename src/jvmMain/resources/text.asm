@@ -1,0 +1,14 @@
+	module CARD_TEXT
+map:
+	dw BRICK_SHORTAGE
+	dw LUCKY_CACHE
+
+data:
+
+BRICK_SHORTAGE:
+	db "BRICK SHORTAGE",#0A
+	db "ALL PLAYERS LOSE",#0A,"",#09,"8 BRICKS",#00
+LUCKY_CACHE:
+	db "LUCKY CACHE",#0A
+	db "+2 BRICKS",#0A,"",#FF,"+2GEMS.",#0A,"",#09,"PLAY AGAIN",#00
+	endmodule

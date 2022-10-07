@@ -71,7 +71,7 @@ enum class Sign {
     LESS_E;
 }
 
-fun Sign.name() = when (this) {
+fun Sign.signChars() = when (this) {
     Sign.LESS -> "<"
     Sign.MORE -> ">"
     Sign.EQUAL -> "="

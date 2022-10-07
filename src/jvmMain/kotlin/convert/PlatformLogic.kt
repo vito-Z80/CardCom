@@ -9,6 +9,7 @@ import androidx.compose.runtime.MutableState
 import bitValueByIndex
 import gson.NewCard
 import hex
+import signChars
 import toAsmLabel
 import toByte
 
@@ -68,6 +69,7 @@ private const val CALL_LOGIC = "\n\tcall logic"
 private const val PUSH_DE = "\n\tpush de"
 private const val CALL_SPECIALS = "\n\tcall LOGIC.exe_specials"
 private const val CALL_EFFECT = "\n\tcall LOGIC.exe_effect"
+private const val CALL_CONDITION = "\n\tcall LOGIC.exe_condition"
 
 private const val CALL_CHECK_COST_CURRENCY = "\n\tcall LOGIC.check_cost_currency\n\tret c"
 private const val RET = "\n\tret"
@@ -233,19 +235,31 @@ object PEffect {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // value ?				            ; если value == 255 то условие по значению структуры, иначе по value
         // sign
-        // player, structure				; left part
-        // player, structure                ; right part: присутствует только если value == 255
-        // player, structure, value 	    ; true content
-        // player, structure, value			; false content: если player == 255 то false content отсутствует
+        // player, structure				    ; left part
+        // player, structure                    ; right part: присутствует только если value == 255
+        // variant, player, structure, value 	        ; true content
+        // variant, player, structure, value			; false content: если player == 255 то false content отсутствует
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /*
+            ; примерный вид кода условия по данным выше
+            call exe_condition
+            jr z,.falseContent      ; (ret z) if falseContent is absent
+            ; trueContent
+            call effects
+            ret
+        .falseContent:
+            call effects
+            ret
+         */
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         val value = (condition.value?.rightPart?.value?.get(0)?.value?.value ?: "255").toInt()
 
         val trueContent = condition.value?.conditionTrue?.value
         val falseContent = condition.value?.conditionFalse?.value
-        // FIXME sign хуйню считает выдет всегда #40 (it.name() мозгу пудрит)
-        val sign = Sign.values().indexOfFirst { it.name == condition.value?.sign?.value }.bitValueByIndex()
+        val sign = Sign.values().indexOfFirst { it.signChars() == condition.value?.sign?.value }.bitValueByIndex()
         val left = condition.value?.leftPart?.value?.get(0)
         val right = condition.value?.rightPart?.value?.get(0)
+
         // value
         logicData.append("\n\tdb ${value.toByte().hex()}\t; #FF by structure value else by value.")
         // sign
@@ -268,15 +282,26 @@ object PEffect {
                     .hex()
             logicData.append("\n\tdb $structureR\t; ${condition.value?.rightPart?.value?.get(0)?.structure?.value}")
         }
+        logicCode.append(CALL_CONDITION)
+        if (falseContent != null) {
+            logicCode.append("\n\tjr z,.falseContent")
+        } else {
+            logicCode.append("\n\tret z")
+        }
+
+        // TODO начать тестировать асм код и результат созданных данных !!!
+        //  начать с эфектов
         // true content
         effect(card, trueContent)
+        logicCode.append(RET)
         if (falseContent != null) {
             // false content
+            logicCode.append("\n.falseContent:")
             effect(card, falseContent)
+            logicCode.append(RET)
         } else {
             logicData.append("\n\tdb #FF\t; no false content in condition.")
         }
-
 
     }
 

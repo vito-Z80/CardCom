@@ -18,6 +18,7 @@ import convert.PlatformLogic
 import convert.PlatformSprite
 import convert.PlatformText
 import file.loadTemplate
+import file.saveData
 import file.saveTemplate
 import kotlin.system.exitProcess
 
@@ -50,18 +51,19 @@ fun mainMenu() {
 @Composable
 fun popupCardMenu(expand: MutableState<Boolean>) {
 
-    LaunchedEffect(AppData.convert){
+    LaunchedEffect(AppData.convert) {
         if (AppData.convert) {
             AppData.convert = false
-//            val sprites = PlatformSprite.convert("CARD_SPRITE")
-//            val text = PlatformText.convert("CARD_TEXT")
-//
-//            println(sprites)
-//            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
-//            println(text)
+            val sprites = PlatformSprite.convert("CARD_SPRITE")
+            val text = PlatformText.convert("CARD_TEXT")
+
+            println(sprites)
+            println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
+            println(text)
             println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
             val logic = PlatformLogic.convert("CARD_LOGIC")
             println(logic)
+            saveData(text = text, logic = logic)
         }
     }
 

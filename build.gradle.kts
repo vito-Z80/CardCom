@@ -15,13 +15,6 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
-//dependencies {
-//    implementation("com.google.code.gson:gson:2.9.0")
-//}
-
-//dependencies {
-//    implementation("com.google.code.gson:gson:2.9.0")
-//}
 
 
 kotlin {
@@ -34,7 +27,7 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             dependencies {
-                implementation(compose.desktop.currentOs)
+                implementation(compose.desktop.windows_x64)
                 implementation("com.google.code.gson:gson:2.9.1")
             }
         }

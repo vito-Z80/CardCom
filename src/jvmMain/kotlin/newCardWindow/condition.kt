@@ -77,7 +77,7 @@ fun condition(newCard: NewCard?) {
                         Column(verticalArrangement = Arrangement.Center) {
                             popupButton(
                                 card = newCard,
-                                items = Sign.values().map { it.name() },
+                                items = Sign.values().map { it.signChars() },
                                 text = fun() = newCard?.condition?.value?.sign?.value ?: Message.SIGN,
                                 popupClickable = fun(s: String) { newCard?.condition?.value?.sign?.value = s },
                                 fontSize = 32f
