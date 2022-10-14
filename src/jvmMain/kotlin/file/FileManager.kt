@@ -109,17 +109,13 @@ fun loadTemplate() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-fun saveData(sprites: String? = null, text: String, logic: String) {
+fun saveData(sprites: String, text: String, logic: String) {
     try {
-        if (sprites != null) {
-            File("sprites.asm").writeText(sprites)
-        } else {
-            PlatformSprite.binaryMap.addAll(PlatformSprite.binaryData.toTypedArray())
-            File("sprite.bin").writeBytes(PlatformSprite.binaryMap.toByteArray())
-        }
+        File("sprites.asm").writeText(sprites)
+        File("sprite.bin").writeBytes(PlatformSprite.binaryData.toByteArray())
         File("text.asm").writeText(text)
         File("logic.asm").writeText(logic)
-        JOptionPane.showMessageDialog(window, "ASM data be saved.")
+        JOptionPane.showMessageDialog(window, "ASM data saved.")
     } catch (e: FileSystemException) {
         JOptionPane.showMessageDialog(window, "Files can`t be saved. пачимута...")
         println(e)

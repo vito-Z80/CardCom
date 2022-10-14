@@ -4,6 +4,7 @@ import AppData
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
 import cardImages
+import hex
 import toAsmLabel
 import java.util.*
 import kotlin.collections.ArrayList
@@ -54,10 +55,11 @@ object PlatformSprite {
             spriteMap.append("\n\tdw $spriteName")
 
             // binary
-            data?.first?.forEach {
+
+            let { d2?.first }?.also {
                 binaryData.addAll(it.toTypedArray())
             }
-            let { data?.second }?.also {
+            let { d2?.second }?.also {
                 binaryData.addAll(it.toTypedArray())
             }
             binaryMapAddress += binaryData.size
@@ -128,11 +130,13 @@ object PlatformSprite {
             repeat(SYMBOL_SIZE) {
                 repeat(width) { x ->
                     val byte = symbols.first[i + x][it]
+//                    print("${byte.hex()},")
                     sprite.add(byte)
                 }
+                println()
             }
-
         }
+        println("++++++++++++++++++++++++++++++++++++")
         return Pair(sprite.toByteArray(), symbols.second)
     }
 

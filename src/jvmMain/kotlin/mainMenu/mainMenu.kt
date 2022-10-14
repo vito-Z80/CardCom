@@ -63,7 +63,7 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
             println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
             val logic = PlatformLogic.convert("CARD_LOGIC")
             println(logic)
-            saveData(text = text, logic = logic)
+            saveData(sprites = sprites,text = text, logic = logic)
         }
     }
 
