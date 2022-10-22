@@ -6,12 +6,12 @@ import Sign
 import Structure
 import Variant
 import androidx.compose.runtime.MutableState
-import bitValueByIndex
 import gson.NewCard
 import hex
 import signChars
 import toAsmLabel
 import toByte
+import valueBy
 
 
 object Tag {
@@ -68,10 +68,10 @@ general_effect:
 private const val CALL_LOGIC = "\n\tcall logic"
 private const val PUSH_DE = "\n\tpush de"
 private const val CALL_SPECIALS = "\n\tcall LOGIC.exe_specials"
-private const val CALL_EFFECT = "\n\tcall LOGIC.exe_effect"
+private const val CALL_EFFECT = "\n\tcall LOGIC.resource_calc"
 private const val CALL_CONDITION = "\n\tcall LOGIC.exe_condition"
 
-private const val CALL_CHECK_COST_CURRENCY = "\n\tcall LOGIC.check_cost_currency\n\tret c"
+private const val CALL_CHECK_COST_CURRENCY = "call LOGIC.check_cost_currency\n\tret nz"
 private const val RET = "\n\tret"
 
 private val logicData = StringBuilder()
@@ -106,11 +106,11 @@ object PlatformLogic {
             logicCode.append(RET)
         }
 
-//        AppData.cards?.forEachIndexed { id, card ->
+//        AppData.cards.gson?.forEachIndexed { id, card ->
 //            PEffect.co(card, card?.condition)
 //        }
 //
-//        AppData.cards?.forEachIndexed { id, card ->
+//        AppData.cards.gson?.forEachIndexed { id, card ->
 //            PEffect.specials(card?.specials?.value)
 //        }
 
@@ -127,16 +127,27 @@ object PlatformLogic {
         return asmCode.toString()
     }
 
+    /**
+     * Если цена == 0, то валютный ресурс не имеет значения, так как вычета не будет.
+     * Цена в ASM коде отображается как отрицательное HEX число если оно не равно нулю.
+     * В ASM коде нужно учитывать когда цена рава нулю. Следующим байтом сразу будут идти данные эфекта.
+     * Данные о валютном ресурсе будут отсутствовать.
+     */
     private fun costCurrency(card: NewCard?) {
-        val cost = card?.cardCost?.value?.toByte()?.hex()
-        val currency = Structure.values().indexOfFirst { it.name == card?.costCurrency?.value?.uppercase() }
-            .toByte().hex()
-        logicData.append("\n\tdb $currency")
-        logicData.append("\t; currency: ${card?.costCurrency?.value}")
+        val c = (card?.cardCost?.value?.toByte() ?: 0).toByte()
+        val cost = (0 - c).toByte().hex()
+        val currency =
+            Structure.values().indexOfFirst { it.name == card?.costCurrency?.value?.uppercase() }.valueBy(BitMask.WORD)
+                .toByte().hex()
         logicData.append("\n\tdb $cost")
         logicData.append("\t; cost: ${card?.cardCost?.value}")
+        if (c == (0).toByte()) {
+            logicData.append("\n\t; The currency is irrelevant when the price is zero.")
+        } else {
+            logicData.append("\n\tdb $currency")
+            logicData.append("\t; currency: ${card?.costCurrency?.value}")
+        }
     }
-
 }
 
 object PEffect {
@@ -152,12 +163,12 @@ object PEffect {
         // variant,structure
         logicData.append("\n\tdb ")
         // variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).bitValueByIndex().toByte().hex()},")
+        logicData.append("${Variant.values().indexOf(e.variant.value).valueBy(BitMask.BIT).toByte().hex()},")
         // structure
         logicData.append(
-            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
+            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.BIT).toByte()
                 .hex()
-        )
+                        )
         logicData.append("\t; effect: ${e.variant.value}, ${e.structure.value}")
     }
 
@@ -165,7 +176,7 @@ object PEffect {
         // variant, value, player, structure
         logicData.append("\n\tdb ")
         // effect variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).bitValueByIndex().toByte().hex()},")
+        logicData.append("${Variant.values().indexOf(e.variant.value).valueBy(BitMask.BIT).toByte().hex()},")
         // value
         val value = (e.value.value?.toByte() ?: 0xFF).toByte()
         logicData.append("${value.hex()},")
@@ -173,30 +184,46 @@ object PEffect {
         logicData.append("${Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()},")
         // structure
         logicData.append(
-            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
+            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.BIT).toByte()
                 .hex()
-        )
+                        )
         logicData.append("\t; effect: ${e.variant.value}, ${e.value.value}, ${e.player.value}, ${e.structure.value}")
     }
 
+    /**
+     * Данные основного эфекта.
+     * 3 байта (player, resource, value)
+     * player:
+     *      0 - player
+     *      1 - enemy
+     *      2 - all
+     * resource:
+     *      0 - wall
+     *      2 - tower
+     *      4 - quarry
+     *      6 - bricks
+     *      8 - magic
+     *      10 - gems
+     *      12 - dungeon
+     *      14 - recruits
+     * value:
+     *      value :)
+     */
     private fun general(e: NewCard.Effect) {
         // action, variant, player, structure, value
         logicData.append("\n\tdb ")
-        // effect variant
-        val variant = Variant.values().indexOf(e.variant.value).bitValueByIndex().toByte().hex()
         // player
         val player = Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()
         // structure
         val structure =
-            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.bitValueByIndex().toByte()
+            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.WORD).toByte()
                 .hex()
         // value
         val value = e.value.value?.toByte()?.hex()
-        logicData.append("$variant,")
         logicData.append("${player},")
         logicData.append("$structure,")
         logicData.append(value ?: error("Wrong value..."))
-        logicData.append("\t; effect: ${e.variant.value}, ${e.player.value}, ${e.structure.value}, ${e.value.value}")
+        logicData.append("\t; ${e.player.value}, ${e.structure.value}, ${e.value.value}")
     }
 
     fun effect(card: NewCard?, effects: List<NewCard.Effect?>?) {
@@ -256,7 +283,7 @@ object PEffect {
 
         val trueContent = condition.value?.conditionTrue?.value
         val falseContent = condition.value?.conditionFalse?.value
-        val sign = Sign.values().indexOfFirst { it.signChars() == condition.value?.sign?.value }.bitValueByIndex()
+        val sign = Sign.values().indexOfFirst { it.signChars() == condition.value?.sign?.value }.valueBy(BitMask.BIT)
         val left = condition.value?.leftPart?.value?.get(0)
         val right = condition.value?.rightPart?.value?.get(0)
 
@@ -268,18 +295,16 @@ object PEffect {
         val player = Player.values().indexOfFirst { it.name == left?.player?.value?.uppercase() }.toByte().hex()
         logicData.append("\n\tdb $player\t; ${condition.value?.leftPart?.value?.get(0)?.player?.value}")
         val structure =
-            Structure.values().indexOfFirst { it.name == left?.structure?.value?.uppercase() }.bitValueByIndex()
-                .toByte()
-                .hex()
+            Structure.values().indexOfFirst { it.name == left?.structure?.value?.uppercase() }.valueBy(BitMask.WORD)
+                .toByte().hex()
         logicData.append("\n\tdb $structure\t; ${condition.value?.leftPart?.value?.get(0)?.structure?.value}")
         if (value == 255) {
             // right part
             val playerR = Player.values().indexOfFirst { it.name == right?.player?.value?.uppercase() }.toByte().hex()
             logicData.append("\n\tdb $playerR\t; ${condition.value?.rightPart?.value?.get(0)?.player?.value}")
             val structureR =
-                Structure.values().indexOfFirst { it.name == right?.structure?.value?.uppercase() }.bitValueByIndex()
-                    .toByte()
-                    .hex()
+                Structure.values().indexOfFirst { it.name == right?.structure?.value?.uppercase() }.valueBy(BitMask.WORD)
+                    .toByte().hex()
             logicData.append("\n\tdb $structureR\t; ${condition.value?.rightPart?.value?.get(0)?.structure?.value}")
         }
         logicCode.append(CALL_CONDITION)

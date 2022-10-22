@@ -4,7 +4,6 @@ map:
 	dw LUCKY_CACHE
 	dw FRIENDLY_TERRAIN
 	dw MINERS
-	dw MOTHER_LODE
 
 data:
 
@@ -20,7 +19,4 @@ FRIENDLY_TERRAIN:
 MINERS:
 	db "MINERS",#0A
 	db "null",#00
-MOTHER_LODE:
-	db "MOTHER LODE",#0A
-	db "IF",#0A,"QUARRY < ENEMY",#0A,"QUARRY,",#0A,"",#FF,"+2 QUARRY.",#0A,"ELSE,",#0A,"",#FF,"+1 QUARRY.",#00
 	endmodule

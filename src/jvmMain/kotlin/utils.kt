@@ -39,35 +39,30 @@ fun popupButton(
     popupClickable: (s: String) -> Unit,
     fontSize: Float = 18f,
     enabled: MutableState<Boolean> = mutableStateOf(true),
-) {
+               ) {
     var visible by remember { mutableStateOf(false) }
 
     if (card == null) return
     Text(
         text = text.invoke(),
-        modifier = Modifier
-            .padding(4f.dp)
-            .defaultMinSize(96f.dp, 20f.dp)
-            .background(Color.LightGray)
-            .border(1f.dp, if (enabled.value) Color.DarkGray else Color(176, 176, 176))
-            .clickable(
+        modifier = Modifier.padding(4f.dp).defaultMinSize(96f.dp, 20f.dp).background(Color.LightGray)
+            .border(1f.dp, if (enabled.value) Color.DarkGray else Color(176, 176, 176)).clickable(
                 enabled = enabled.value,
-            ) {
+                                                                                                 ) {
                 visible = true
             },
         fontSize = fontSize.sp,
         textAlign = TextAlign.Center,
         color = if (enabled.value) Color.DarkGray else Color(176, 176, 176)
-    )
+        )
     DropdownMenu(
         expanded = visible, onDismissRequest = { visible = false },
-    ) {
+                ) {
         items.forEach {
             DropdownMenuItem(onClick = {
                 popupClickable.invoke(it)
                 visible = false
-            }
-            ) {
+            }) {
                 Text(text = it, fontSize = fontSize.sp)
             }
         }
@@ -81,23 +76,19 @@ fun button(
     onClick: () -> Unit,
     fontSize: Float = 18f,
     enabled: MutableState<Boolean> = mutableStateOf(true),
-) {
+          ) {
     Text(
         text = text,
-        modifier = Modifier
-            .padding(4f.dp)
-            .defaultMinSize(96f.dp, 20f.dp)
-            .background(Color.LightGray)
-            .border(1f.dp, if (enabled.value) Color.DarkGray else Color(176, 176, 176))
-            .clickable(
+        modifier = Modifier.padding(4f.dp).defaultMinSize(96f.dp, 20f.dp).background(Color.LightGray)
+            .border(1f.dp, if (enabled.value) Color.DarkGray else Color(176, 176, 176)).clickable(
                 enabled = enabled.value,
-            ) {
+                                                                                                 ) {
                 onClick.invoke()
             },
         fontSize = fontSize.sp,
         textAlign = TextAlign.Center,
         color = if (enabled.value) Color.DarkGray else Color(176, 176, 176)
-    )
+        )
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,20 +101,17 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
     var expander by remember { mutableStateOf(false) }
 
     DropdownMenu(
-        expanded = expander,
-        onDismissRequest = {
+        expanded = expander, onDismissRequest = {
             expander = false
-        },
-        modifier = Modifier
-    ) {
+        }, modifier = Modifier
+                ) {
         Variant.values().forEachIndexed { index, variant ->
             DropdownMenuItem(
                 onClick = {
                     eff?.variant?.value = variant//.name()
                     expander = false
-                },
-                modifier = Modifier
-            ) {
+                }, modifier = Modifier
+                            ) {
                 Column {
                     Text(text = variant.name(), color = Color.Blue)
                     Divider()
@@ -136,14 +124,11 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
         ClickableText(
             // "variant" is "Undefined" = "General"
             text = AnnotatedString(eff?.variant?.value?.name() ?: Message.UNDEFINED),
-            modifier = Modifier
-                .rotate(-90f)
-                .textVertical(),
+            modifier = Modifier.rotate(-90f).textVertical(),
             style = TextStyle(color = Color.Blue),
             onClick = {
                 expander = true
-            }
-        )
+            })
 
         Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
             if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL || eff.variant.value == Variant.ASSIGN) {
@@ -153,12 +138,8 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
             } else if (eff.variant.value == Variant.GET_HALF) {
                 eff.player.value = Player.ENEMY.name()
                 effectLabel(
-                    card,
-                    eff.player,
-                    Player.values().map { it.name() },
-                    Player.PLAYER.name(),
-                    mutableStateOf(false)
-                )
+                    card, eff.player, Player.values().map { it.name() }, Player.PLAYER.name(), mutableStateOf(false)
+                           )
                 effectLabel(card, eff.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
                 inputDigit(eff.value)
             } else {
@@ -175,36 +156,33 @@ fun effectLabel(
     items: List<String>,
     text: String,
     enabled: MutableState<Boolean> = mutableStateOf(true),
-) {
+               ) {
     Row {
-        popupButton(
-            card = card,
-            items = items,
-            text = fun() = value?.value ?: Message.EMPTY,
-            popupClickable = fun(s: String) { value?.value = s },
-            enabled = enabled
-        )
+        popupButton(card = card,
+                    items = items,
+                    text = fun() = value?.value ?: Message.EMPTY,
+                    popupClickable = fun(s: String) { value?.value = s },
+                    enabled = enabled
+                   )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically),
             text = text,
             fontSize = 12.sp,
-        )
+            )
     }
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  https://stackoverflow.com/questions/70057396/how-to-show-vertical-text-with-proper-size-layout-in-jetpack-compose
-fun Modifier.textVertical() =
-    layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        layout(placeable.height, placeable.width) {
-            placeable.place(
-                x = -(placeable.width / 2 - placeable.height / 2),
-                y = -(placeable.height / 2 - placeable.width / 2)
-            )
-        }
+fun Modifier.textVertical() = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.height, placeable.width) {
+        placeable.place(
+            x = -(placeable.width / 2 - placeable.height / 2), y = -(placeable.height / 2 - placeable.width / 2)
+                       )
     }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO любые символы после цифр должны быть ошибкой
@@ -219,32 +197,24 @@ fun inputDigit(inputText: MutableState<String?>?) {
 
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         BasicTextField(
-            value = inputText?.value ?: Message.EMPTY,
-            onValueChange = { it ->
+            value = inputText?.value ?: Message.EMPTY, onValueChange = { it ->
                 inputText?.value = it
                 error = reg2.containsMatchIn(it)
-            },
-            singleLine = true,
-            maxLines = 1,
-            modifier = Modifier
-                .padding(4f.dp)
+            }, singleLine = true, maxLines = 1, modifier = Modifier.padding(4f.dp)
 
-                .size(96f.dp, 20f.dp)
-                .border(
+                .size(96f.dp, 20f.dp).border(
                     width = 1f.dp, color = if (error) {
                         Color.Red
                     } else {
                         Color.Green
                     }
-                )
-                .background(color = Color.LightGray)
-                .padding(2f.dp)
-        )
+                                            ).background(color = Color.LightGray).padding(2f.dp)
+                      )
         Text(
             modifier = Modifier.align(Alignment.CenterVertically).padding(start = 4f.dp),
             text = Message.VALUE,
             fontSize = 12.sp,
-        )
+            )
     }
 }
 
@@ -253,27 +223,19 @@ fun inputDigit(inputText: MutableState<String?>?) {
 fun BasicInput(inputText: MutableState<String?>?, regex: Regex) {
     var error by remember { mutableStateOf(false) }
     BasicTextField(
-        value = inputText?.value ?: Message.EMPTY,
-        onValueChange = { it ->
+        value = inputText?.value ?: Message.EMPTY, onValueChange = { it ->
             inputText?.value = it
             error = regex.containsMatchIn(it)
-        },
-        singleLine = true,
-        maxLines = 1,
-        modifier = Modifier
-            .padding(4f.dp)
+        }, singleLine = true, maxLines = 1, modifier = Modifier.padding(4f.dp)
 
-            .size(96f.dp, 20f.dp)
-            .border(
+            .size(96f.dp, 20f.dp).border(
                 width = 1f.dp, color = if (error) {
                     Color.Red
                 } else {
                     Color.Green
                 }
-            )
-            .background(color = Color.LightGray)
-            .padding(2f.dp)
-    )
+                                        ).background(color = Color.LightGray).padding(2f.dp)
+                  )
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -281,9 +243,7 @@ fun BasicInput(inputText: MutableState<String?>?, regex: Regex) {
 @Composable
 fun ZxText(text: String, onClick: () -> Unit) {
 
-    Text(text = text, style = MaterialTheme.typography.h6, modifier = Modifier
-        .clickable { onClick.invoke() }
-    )
+    Text(text = text, style = MaterialTheme.typography.h6, modifier = Modifier.clickable { onClick.invoke() })
 
 
 }
@@ -306,7 +266,17 @@ fun String.toByte() = try {
 fun Enum<*>.name() = name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-private val bits = listOf(0, 1, 2, 4, 8, 16, 32, 64)
+enum class BitMask {
+    ORDER, WORD, BIT
+}
+
 // 8 битное значение бита по его индексу с маской
-fun Int.bitValueByIndex() = bits[this and 7]
+private val bit = listOf(0, 1, 2, 4, 8, 16, 32, 64)
+fun Int.valueBy(bitMask: BitMask = BitMask.ORDER): Int {
+    return when (bitMask) {
+        BitMask.WORD -> (this shl 1) and 15
+        BitMask.BIT -> bit[this and 7]
+        else -> this and 7
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

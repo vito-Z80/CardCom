@@ -4,7 +4,6 @@ map:
 	dw LUCKY_CACHE
 	dw FRIENDLY_TERRAIN
 	dw MINERS
-	dw MOTHER_LODE
 BRICK_SHORTAGE_DATA:
 	db #00	; cost: 0
 	; The currency is irrelevant when the price is zero.
@@ -23,17 +22,6 @@ FRIENDLY_TERRAIN_DATA:
 MINERS_DATA:
 	db #FD	; cost: 3
 	db #06	; currency: Bricks
-	db #00,#04,#01	; Player, Quarry, +1
-MOTHER_LODE_DATA:
-	db #FC	; cost: 4
-	db #06	; currency: Bricks
-	db #FF	; #FF by structure value else by value.
-	db #00	; sign <
-	db #00	; Player
-	db #04	; Quarry
-	db #01	; Enemy
-	db #04	; Quarry
-	db #00,#04,#02	; Player, Quarry, +2
 	db #00,#04,#01	; Player, Quarry, +1
 BRICK_SHORTAGE:
 	ld hl,BRICK_SHORTAGE_DATA
@@ -60,17 +48,5 @@ MINERS:
 	call LOGIC.check_cost_currency
 	ret nz
 	call LOGIC.resource_calc
-	ret
-MOTHER_LODE:
-	ld hl,MOTHER_LODE_DATA
-	call LOGIC.check_cost_currency
-	ret nz
-	call LOGIC.exe_condition
-	jr z,.falseContent
-	call LOGIC.resource_calc
-	ret
-.falseContent:
-	call LOGIC.resource_calc
-	ret
 	ret
 	endmodule

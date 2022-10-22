@@ -20,15 +20,11 @@ fun App() {
             newCardDialog(AppData.tmpCard)
         }
 
-        Scaffold(
-            topBar = {
-                mainMenu()
-            },
-            content = {
-                appContent()
-            },
-            bottomBar = { }
-        )
+        Scaffold(topBar = {
+            mainMenu()
+        }, content = {
+            appContent()
+        }, bottomBar = { })
 
     }
 }
@@ -36,7 +32,15 @@ fun App() {
 
 fun main() = application {
     // TODO добавить быстрые клавиши
-    Window(onCloseRequest = ::exitApplication, title = "Arcomage card converter", icon = painterResource("061 Dragon_s Eye (diver).png")) {
+
+    val a = (8).toByte()
+    println((0 - a).toByte().hex())
+
+    Window(
+        onCloseRequest = ::exitApplication, title = "Arcomage card converter", icon = painterResource(
+            "gfx/061 " + "Dragon_s Eye (diver).png"
+                                                                                                     )
+          ) {
         App()
     }
 }
