@@ -274,9 +274,22 @@ enum class BitMask {
 private val bit = listOf(0, 1, 2, 4, 8, 16, 32, 64)
 fun Int.valueBy(bitMask: BitMask = BitMask.ORDER): Int {
     return when (bitMask) {
-        BitMask.WORD -> (this shl 1) and 15
-        BitMask.BIT -> bit[this and 7]
-        else -> this and 7
+        BitMask.WORD -> (this shl 1) and 15     // 0,2,4,6,8,10,12,14
+        BitMask.BIT -> bit[this and 7]          // 0,1,2,4,8,16,32,64
+        else -> this and 7                      // 0,1,2,3,4,5,6,7
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+fun Color.byResource(res: Structure) = when (res) {
+    Structure.WALL -> Color.LightGray
+    Structure.TOWER -> Color.DarkGray
+    Structure.QUARRY -> Color(207, 95, 107, 255)
+    Structure.BRICKS -> Color(207, 95, 107, 255)
+    Structure.MAGIC -> Color(123, 168, 207, 255)
+    Structure.GEMS -> Color(123, 168, 207, 255)
+    Structure.DUNGEON -> Color(126, 163, 126, 255)
+    Structure.RECRUITS -> Color(126, 163, 126, 255)
+    else -> Color.White
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

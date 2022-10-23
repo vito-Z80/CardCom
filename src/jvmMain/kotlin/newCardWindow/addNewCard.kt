@@ -76,7 +76,10 @@ fun newCardDialog(card: NewCard? = NewCard()) {
 
                         if (tryLoadImage) {
                             newCard?.imagePath?.value = getImagePath()
-                            cardImages[newCard?.imagePath?.value] = getImageByPath()
+                            if (newCard?.imagePath?.value != null) {
+                                cardImages[newCard?.imagePath?.value] = getImageByPath()
+                                addLog("The picture [${newCard?.imagePath?.value}] has been loaded.")
+                            }
                             tryLoadImage = false
 //                            val spr = PlatformSprite.asSpriteSymbols(newCard?.imagePath?.value)
 //                            newCard?.zxCard?.value?.spriteBlock8?.value = spr?.first

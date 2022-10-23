@@ -57,9 +57,9 @@ private val typography = Typography(
         fontSize = 8f.sp
     ),
     h3 = TextStyle(
-        fontFamily = ZX,
+//        fontFamily = ZX,
         color = Color.White,
-        fontSize = 16f.sp
+        fontSize = 10f.sp
     ),
     h2 = TextStyle(
         fontFamily = ZX,

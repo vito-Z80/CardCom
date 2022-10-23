@@ -1,6 +1,7 @@
 package mainMenu
 
 import AppData
+import addLog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ fun mainMenu() {
 
     Row(
         modifier = Modifier.fillMaxWidth()
+            .padding(2f.dp)
             .background(color = Color.LightGray)
             .border(width = 1.dp, color = Color.DarkGray)
     ) {

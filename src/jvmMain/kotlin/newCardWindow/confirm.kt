@@ -1,6 +1,7 @@
 package newCardWindow
 
 import AppData
+import addLog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,10 +37,12 @@ fun confirmNewCardWindow(newCard: NewCard?, cancelClick: () -> Unit) {
                 val id = AppData.cards?.indexOf(newCard)
                 if (id == null || id < 0 || AppData.cards!!.isEmpty()) {
                     AppData.cards = AppData.cards?.plus(newCard)
+                    addLog("Crate new card: ${newCard?.cardName?.value?.uppercase()}")
                 } else {
                     val list = AppData.cards?.toMutableList()
                     list?.set(id, newCard)
                     AppData.cards = list?.toList()
+                    addLog("Card ${newCard?.cardName?.value?.uppercase()} be changed.")
                 }
             }
         ) {

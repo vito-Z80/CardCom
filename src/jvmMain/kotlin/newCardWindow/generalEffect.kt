@@ -3,6 +3,7 @@ package newCardWindow
 
 import Index
 import Message
+import addLog
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

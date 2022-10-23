@@ -5,7 +5,9 @@ import Player
 import Sign
 import Structure
 import Variant
+import addLog
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.graphics.Color
 import gson.NewCard
 import hex
 import signChars
@@ -13,57 +15,6 @@ import toAsmLabel
 import toByte
 import valueBy
 
-
-object Tag {
-    /*
-        GENERAL_EFFECT:
-        player, structure, value
-general_effect:
-        if player == player; player[IX] else enemy[IY]
-        ld a,(player + STRUCTURE)
-        add value
-        jr nc,.l1
-        ld a,1
-.l1:
-        ld (player + STRUCTURE),a
-        ret
-     */
-    // логика эфекта с вычислениями (+-)
-    const val GENERAL_EFFECT = 0b10000000
-
-    /*
-        ld a,value
-        ld (player + structure),a
-        ret
-     */
-    // логика эфекта с присвоением (без вычислений)
-    const val EQUAL_EFFECT = 0b10100000
-
-
-    /*
-        CONDITION:
-        sign
-        player, structure
-        player, structure, digit
-     */
-    // условие (знак условия, левая и правая части)
-    // левая часть не может содержать value.
-    // правая часть содержит только value или только player,structure
-    const val CONDITION = 0b10000001
-
-    // результат если условие верно
-    const val TRUE = 0b10000010
-
-    // результат если условие ложно
-    const val FALSE = 0b10000100
-
-    // специальные возможности карты
-    const val SPECIAL = 0b10001000
-
-    // валюта которой игрок должен оплатить карту
-    const val CURRENCY = 0b10010000
-
-}
 
 private const val CALL_LOGIC = "\n\tcall logic"
 private const val PUSH_DE = "\n\tpush de"
@@ -102,7 +53,7 @@ object PlatformLogic {
             logicCode.append("\n\t$CALL_CHECK_COST_CURRENCY")
             PEffect.specials(card, card.specials.value)
             PEffect.effect(card, card.effects.value)
-            PEffect.co(card, card.condition)
+            PEffect.co(card, card.condition, label)
             logicCode.append(RET)
         }
 
@@ -135,17 +86,33 @@ object PlatformLogic {
      */
     private fun costCurrency(card: NewCard?) {
         val c = (card?.cardCost?.value?.toByte() ?: 0).toByte()
-        val cost = (0 - c).toByte().hex()
-        val currency =
-            Structure.values().indexOfFirst { it.name == card?.costCurrency?.value?.uppercase() }.valueBy(BitMask.WORD)
-                .toByte().hex()
-        logicData.append("\n\tdb $cost")
-        logicData.append("\t; cost: ${card?.cardCost?.value}")
-        if (c == (0).toByte()) {
-            logicData.append("\n\t; The currency is irrelevant when the price is zero.")
+//        val cost = (0 - c).toByte().hex()
+        val cost = card?.cardCost?.value?.toByte().let {
+            if (it == null) null else (0 - it).toByte().hex()
+        }
+        val currency = Structure.values().indexOfFirst { it.name == card?.costCurrency?.value?.uppercase() }.let {
+            if (it >= 0) it.valueBy(BitMask.WORD).toByte().hex() else null
+        }
+        if (cost != null) {
+            logicData.append("\n\tdb $cost")
+            logicData.append("\t; cost: ${card?.cardCost?.value}")
         } else {
-            logicData.append("\n\tdb $currency")
-            logicData.append("\t; currency: ${card?.costCurrency?.value}")
+            addLog("Cost not set for card: ${card?.cardName?.value?.uppercase()}", Color.Red)
+        }
+
+        if (currency != null) {
+            if (c == (0).toByte()) {
+                logicData.append("\n\t; The currency is irrelevant when the price is zero.")
+            } else {
+                logicData.append("\n\tdb $currency")
+                logicData.append("\t; currency: ${card?.costCurrency?.value}")
+            }
+        } else {
+            if (c == (0).toByte()) {
+                logicData.append("\n\t; The currency is irrelevant when the price is zero.")
+            } else {
+                addLog("Currency not set for card: ${card?.cardName?.value?.uppercase()}", Color.Red)
+            }
         }
     }
 }
@@ -172,22 +139,38 @@ object PEffect {
         logicData.append("\t; effect: ${e.variant.value}, ${e.structure.value}")
     }
 
+    /*
+Присвоить новое значение ресурсу или получить значение ресурса оппонента
+	#FF = получить значение ресурса оппонента: #FF, #01, #02 > enemy quarry
+		значение бараков опонента присваивается значению бараков игрока
+	!#FF = присвоить нвоое значение ресурсу: #NN, #02 > N player quarry
+		присвоить значение #NN баракам игрока
+*/
     private fun assign(e: NewCard.Effect) {
         // variant, value, player, structure
         logicData.append("\n\tdb ")
         // effect variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).valueBy(BitMask.BIT).toByte().hex()},")
+//        logicData.append("${Variant.values().indexOf(e.variant.value).valueBy(BitMask.BIT).toByte().hex()},")
         // value
         val value = (e.value.value?.toByte() ?: 0xFF).toByte()
         logicData.append("${value.hex()},")
-        // player
-        logicData.append("${Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()},")
         // structure
-        logicData.append(
-            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.BIT).toByte()
-                .hex()
-                        )
-        logicData.append("\t; effect: ${e.variant.value}, ${e.value.value}, ${e.player.value}, ${e.structure.value}")
+        logicData.append(Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }
+                             .valueBy(BitMask.WORD).toByte().hex())
+
+        if (value == (255).toByte()) {
+            logicData.append(",")
+            // player
+            logicData.append(
+                Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()
+                            )
+            logicData.append(
+                "\t; value, ${e.structure.value},  ${e.player.value} [enemy ${e.structure.value} value " + "copy to player]"
+                            )
+        } else {
+            logicData.append("\t; value, ${e.structure.value} [$value copy to player ${e.structure.value}]")
+        }
+        logicCode.append("\n\tcall LOGIC.assign_calc")
     }
 
     /**
@@ -224,10 +207,21 @@ object PEffect {
         logicData.append("$structure,")
         logicData.append(value ?: error("Wrong value..."))
         logicData.append("\t; ${e.player.value}, ${e.structure.value}, ${e.value.value}")
+
+//        val effectCounter = if (effects.size < 2) "" else "_${effects.size}"
+        logicCode.append(CALL_EFFECT)
     }
 
     fun effect(card: NewCard?, effects: List<NewCard.Effect?>?) {
         if (!effects.isNullOrEmpty()) {
+            val eSize = effects.size
+            val undefinedSize = effects.count { it?.variant?.value == null }
+            if (undefinedSize > 0) {
+                addLog(
+                    "Card effect is UNDEFINED for card: ${card?.cardName?.value?.uppercase()}. Effects: $eSize, Undefined: " + "$undefinedSize",
+                    Color.Red
+                      )
+            }
             effects.forEach { e ->
                 when (e?.variant?.value) {
                     Variant.GENERAL, Variant.GET_HALF -> {
@@ -245,8 +239,6 @@ object PEffect {
                     else -> {}
                 }
             }
-            val effectCounter = if (effects.size < 2) "" else "_${effects.size}"
-            logicCode.append(CALL_EFFECT + effectCounter)
         }
     }
 
@@ -256,7 +248,7 @@ object PEffect {
     //                                                                                         //
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?) {
+    fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?, label: String) {
         if (condition?.value == null) return
         // value берется с rightPart value и rightPart не используется если value != 255
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -270,11 +262,12 @@ object PEffect {
         /*
             ; примерный вид кода условия по данным выше
             call exe_condition
-            jr z,.falseContent      ; (ret z) if falseContent is absent
+            jr nz,.falseContent      ; (ret z) if falseContent is absent
             ; trueContent
             call effects
             ret
         .falseContent:
+            ld hl,card_name_data_false_content
             call effects
             ret
          */
@@ -302,28 +295,26 @@ object PEffect {
             // right part
             val playerR = Player.values().indexOfFirst { it.name == right?.player?.value?.uppercase() }.toByte().hex()
             logicData.append("\n\tdb $playerR\t; ${condition.value?.rightPart?.value?.get(0)?.player?.value}")
-            val structureR =
-                Structure.values().indexOfFirst { it.name == right?.structure?.value?.uppercase() }.valueBy(BitMask.WORD)
-                    .toByte().hex()
+            val structureR = Structure.values().indexOfFirst { it.name == right?.structure?.value?.uppercase() }
+                .valueBy(BitMask.WORD).toByte().hex()
             logicData.append("\n\tdb $structureR\t; ${condition.value?.rightPart?.value?.get(0)?.structure?.value}")
         }
         logicCode.append(CALL_CONDITION)
         if (falseContent != null) {
-            logicCode.append("\n\tjr z,.falseContent")
+            logicCode.append("\n\tjr nz,.falseContent")
         } else {
-            logicCode.append("\n\tret z")
+            logicCode.append("\n\tret nz")
         }
-
-        // TODO начать тестировать асм код и результат созданных данных !!!
-        //  начать с эфектов
         // true content
         effect(card, trueContent)
-        logicCode.append(RET)
         if (falseContent != null) {
             // false content
-            logicCode.append("\n.falseContent:")
-            effect(card, falseContent)
             logicCode.append(RET)
+            logicCode.append("\n.falseContent:")
+            logicCode.append("\n\tld hl,${label}_DATA_FALSE")
+            logicData.append("\n${label}_DATA_FALSE:")
+            effect(card, falseContent)
+//            logicCode.append(RET)
         } else {
             logicData.append("\n\tdb #FF\t; no false content in condition.")
         }

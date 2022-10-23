@@ -1,9 +1,12 @@
 package file
 
 import AppData
+import addLog
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import cardImages
 import convert.PlatformSprite
 import gson.*
 import org.jetbrains.skia.Image
@@ -29,6 +32,7 @@ internal fun getImagePath(): String? {
     val returnVal = chooser.showOpenDialog(window)
     if (returnVal == JFileChooser.APPROVE_OPTION) {
         Log.info("Get image file path: ${chooser.selectedFile.absoluteFile}")
+
         return chooser.selectedFile.toString()
     }
     return null
@@ -75,13 +79,15 @@ fun saveTemplate() {
     val returnVal = chooser.showSaveDialog(window)
     if (returnVal == JFileChooser.APPROVE_OPTION) {
         val absoluteFile = chooser.selectedFile.absoluteFile
-        println("$absoluteFile.${gsonFilter.extensions[0]}")
+//        println("$absoluteFile.${gsonFilter.extensions[0]}")
         try {
 //            chooser.selectedFile.name.plus(".${gsonFilter.extensions[0]}")
             chooser.selectedFile.writeText(result, Charsets.UTF_8)
             JOptionPane.showMessageDialog(window, "File ${chooser.selectedFile} be saved.")
+            addLog("File ${chooser.selectedFile} saved. (${AppData.cards?.size} cards. ${cardImages.size} images.)")
         } catch (e: Exception) {
             JOptionPane.showMessageDialog(window, "File ${chooser.selectedFile} can`t be saved. пачимута...")
+            addLog("File ${chooser.selectedFile} can`t be loading.", Color.Red)
         }
     }
 }
@@ -95,15 +101,18 @@ fun loadTemplate() {
     if (returnVal == JFileChooser.APPROVE_OPTION) {
         try {
             val jsonText = chooser.selectedFile.readText(Charsets.UTF_8)
-            println(jsonText)
+//            println(jsonText)
             JOptionPane.showMessageDialog(window, "File ${chooser.selectedFile} loaded.")
             val ser = gson.fromJson(jsonText, DesCards::class.java)
-            println(ser)
+//            println(ser)
             if (ser != null) prepareForDeserialize(ser)
-            println(AppData.cards.toString())
+//            println(AppData.cards.toString())
+            addLog("File ${chooser.selectedFile} loaded. (${AppData.cards?.size} cards. ${cardImages.size} images.)")
+
 
         } catch (e: Exception) {
             JOptionPane.showMessageDialog(window, "File ${chooser.selectedFile} can`t be loading.\nпачимута...")
+            addLog("File ${chooser.selectedFile} can`t be loading.", Color.Red)
         }
     }
 }
@@ -116,9 +125,10 @@ fun saveData(sprites: String, text: String, logic: String) {
         File("text.asm").writeText(text)
         File("logic.asm").writeText(logic)
         JOptionPane.showMessageDialog(window, "ASM data saved.")
+        addLog("Saved: sprites.asm, sprite.bin, text.asm, logic.asm")
     } catch (e: FileSystemException) {
         JOptionPane.showMessageDialog(window, "Files can`t be saved. пачимута...")
-        println(e)
+        addLog("Files can`t be saving.", Color.Red)
         e.printStackTrace()
     }
 }
