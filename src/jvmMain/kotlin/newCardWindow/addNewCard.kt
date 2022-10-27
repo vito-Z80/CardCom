@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -40,35 +37,34 @@ fun newCardDialog(card: NewCard? = NewCard()) {
     var tryLoadImage by mutableStateOf(false)
 
 
-    Dialog(
-        onCloseRequest = {
-            newCard = null
-            AppData.tmpCard = null
-            AppData.showCardDialog = false
-        },
-        title = "Create new card",
-        undecorated = true,
-        transparent = true,
-        state = DialogState(position = WindowPosition(Alignment.Center), width = 768f.dp, height = 512f.dp),
-        onKeyEvent = {
-            if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
-                newCard = null
-                AppData.tmpCard = null
-                AppData.showCardDialog = false
-                true
-            } else {
-                false
-            }
-        }
+    Dialog(onCloseRequest = {
+        newCard = null
+        AppData.tmpCard = null
+        AppData.showCardDialog = false
+    },
+           title = "Create new card",
+           undecorated = true,
+           transparent = true,
+           state = DialogState(position = WindowPosition(Alignment.Center), width = 768f.dp, height = 512f.dp),
+           onKeyEvent = {
+               if (it.key == Key.Escape && it.type == KeyEventType.KeyDown) {
+                   newCard = null
+                   AppData.tmpCard = null
+                   AppData.showCardDialog = false
+                   true
+               } else {
+                   false
+               }
+           }
 
-    ) {
+          ) {
 
 
         Surface(
             shape = AbsoluteRoundedCornerShape(12.dp),
             color = Color.Yellow,
             modifier = Modifier.border(width = 1f.dp, color = Color.Black, shape = AbsoluteRoundedCornerShape(12.dp)),
-        ) {
+               ) {
             Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(4f.dp)) {
 
                 LazyColumn(modifier = Modifier.weight(1f).padding(4f.dp)) {
@@ -91,9 +87,8 @@ fun newCardDialog(card: NewCard? = NewCard()) {
 
                         item {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
+                                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                               ) {
                                 Button(onClick = {
                                     tryLoadImage = true
                                 }) {
@@ -115,6 +110,7 @@ fun newCardDialog(card: NewCard? = NewCard()) {
                             inputCardName(newCard!!)
                             inputCardDescription(newCard!!)
                             inputCardCost(newCard!!)
+                            inputProbability(newCard!!)
                             specials(newCard)
 
                             generalEffect(newCard, newCard?.effects, "Effects")
@@ -140,13 +136,11 @@ private fun inputCardName(newCard: NewCard) {
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
         horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        OutlinedTextField(
-            value = newCard.cardName.value ?: Message.EMPTY,
-            onValueChange = { newCard.cardName.value = it },
-            singleLine = true,
-            label = { Text("Card Name") }
-        )
+       ) {
+        OutlinedTextField(value = newCard.cardName.value ?: Message.EMPTY,
+                          onValueChange = { newCard.cardName.value = it },
+                          singleLine = true,
+                          label = { Text("Card Name") })
     }
 }
 
@@ -155,12 +149,11 @@ private fun inputCardDescription(newCard: NewCard) {
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
         horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        OutlinedTextField(
-            value = newCard.cardDescription.value ?: Message.EMPTY,
-            onValueChange = { newCard.cardDescription.value = it },
-            singleLine = true,
-            label = { Text("Card Description") })
+       ) {
+        OutlinedTextField(value = newCard.cardDescription.value ?: Message.EMPTY,
+                          onValueChange = { newCard.cardDescription.value = it },
+                          singleLine = true,
+                          label = { Text("Card Description") })
     }
 }
 
@@ -169,7 +162,7 @@ private fun inputCardCost(newCard: NewCard) {
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
         horizontalArrangement = Arrangement.SpaceAround
-    ) {
+       ) {
         Row {
             Text("Cost: ", modifier = Modifier.align(Alignment.CenterVertically))
             BasicInput(newCard.cardCost, regOnlyDigit)
@@ -180,9 +173,33 @@ private fun inputCardCost(newCard: NewCard) {
                 items = Structure.values().map { it.name() },
                 text = fun() = newCard.costCurrency.value ?: "Currency",
                 popupClickable = fun(s: String) { newCard.costCurrency.value = s },
-            )
+                       )
         }
     }
 }
 
+//----------------------------------------------------------------------------------------------------------------------
+@Composable
+private fun inputProbability(newCard: NewCard) {
+    var value by remember { mutableStateOf(1f) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(ScrollState(0)),
+        horizontalArrangement = Arrangement.SpaceAround
+       ) {
+        Row {
+            Text("Probability: ", modifier = Modifier.align(Alignment.CenterVertically))
+        }
+        Column(modifier = Modifier.align(Alignment.CenterVertically), verticalArrangement = Arrangement.Center) {
+            popupButton(
+                card = newCard,
+                items = List(3) { (it + 1).toString() },
+                text = fun() = newCard.probability.value ?: "1",
+                popupClickable = fun(s: String) { newCard.probability.value = s },
+                       )
+        }
+    }
+
+
+}
 //----------------------------------------------------------------------------------------------------------------------

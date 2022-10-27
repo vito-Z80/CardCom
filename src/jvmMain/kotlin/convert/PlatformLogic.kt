@@ -14,6 +14,19 @@ import signChars
 import toAsmLabel
 import toByte
 import valueBy
+/*
+Вероятность можно вычислить по формуле:
+P = 1 / K, где K — коэффициент букмекера.
+Находите маржу букмекера по формуле: M = (S — 1) х 100%, где S — сумма вероятностей.
+ */
+// вероятность https://github.com/arcomage/arcomage-hd/blob/main/src/data/cards.ts
+// коэффициент https://github.com/arcomage/arcomage-hd/blob/main/src/ai/coefs.ts
+// баланс https://github.com/arcomage/arcomage-hd/blob/83e7a3257915bd178c3c7790d3c4e97f1baf746b/tools/card-balance/index.ts
+
+
+// https://stackoverflow.com/questions/30492259/get-a-random-number-focused-on-center
+//
+
 
 
 private const val CALL_LOGIC = "\n\tcall logic"
@@ -65,8 +78,14 @@ object PlatformLogic {
 //            PEffect.specials(card?.specials?.value)
 //        }
 
-
+        logicCodeMap.append("\nend_map:")
         asmCode.append(logicCodeMap)
+        // probability map
+        asmCode.append("\nprobability:")
+        AppData.cards?.forEach {
+            asmCode.append("\n\tdb ${it?.probability?.value?.toByte()?.hex() ?: "#01"}")
+        }
+        //
         asmCode.append(logicData)
         asmCode.append(logicCode)
 

@@ -17,6 +17,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import gson.NewCard
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 
 class Index(val id: Int)
@@ -292,4 +297,103 @@ fun Color.byResource(res: Structure) = when (res) {
     Structure.RECRUITS -> Color(126, 163, 126, 255)
     else -> Color.White
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+Вероятность выпадения карт:
+	1) Таблица вероятностей содержит значение (1 байт) на каждую карту, индексы соответствуют.
+		значения вероятностей карт  [1-3]
+	2) Копия таблицы вероятностей.
+
+Процесс выдачи карты.
+	а) Получаем рандомный индекс карты не превышающий кол-во существующих карт в игре - 1.
+	б) По индексу получаем значение вероятности из таблицы(2), отнимаем единицу и сохраняем результат.
+		Если значение равно нулю, то выдать карту с таким индексом и восстановить значение.
+		Иначе пункт (а)
+
+*/
+const val CARDS_COUNT = 102
+
+data class Probability(
+    val probability: Int,    // вероятность выпадения карты
+    var times: Int,          // сколько раз было рандомное обращение к карте пока ее не выдали.
+    var tmp1: Int,
+    var turn: Int,
+                      ) {
+    override fun toString(): String {
+        return "P-$probability; T-$times; H-$turn"
+    }
+}
+
+
+private val result = List<Probability>(CARDS_COUNT) {
+    var r: Int
+    while (true) {
+        r = Random.nextBits(2)
+        if (r != 0) break
+    }
+    r
+    Probability(probability = r, times = 0, tmp1 = r, turn = 0)
+}
+
+private val seed = 891234781
+
+private fun getCard() {
+    while (true) {
+        val id = Random.nextInt(0, CARDS_COUNT - 1)
+        result[id].times++
+        if (result[id].tmp1 == 0) {
+            result[id].tmp1 = result[id].probability
+            result[id].turn++
+            break
+        }
+        result[id].tmp1--
+        if (result[id].tmp1 == 0) {
+            result[id].tmp1 = result[id].probability
+            result[id].turn++
+            break
+        }
+    }
+}
+
+fun probabilityTest() {
+    println("Probabilities:")
+
+    CoroutineScope(Dispatchers.Default).launch {
+        while (true) {
+
+            delay(1000)
+            println(result.joinToString())
+        }
+    }
+
+    CoroutineScope(Dispatchers.Default).launch {
+
+        while (result.any { it.times == 0 }) {
+            getCard()
+            delay(1)
+        }
+    }
+
+
+//    result.forEachIndexed { id, p ->
+//        println("$id: P - ${p.probability}, T - ${p.times}")
+//    }
+
+}
+
+
+fun cardProbability(prob: Int, cardCount: Int, cardId: Int) {
+
+    var obr:Int = 0
+    var p = prob
+    while (p > 0) {
+        while (Random.nextInt(CARDS_COUNT - 1) != cardId) {
+            obr++
+        }
+        p--
+    }
+    println(obr)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

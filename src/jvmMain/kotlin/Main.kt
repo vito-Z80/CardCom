@@ -37,6 +37,9 @@ fun App() {
 fun main() = application {
     // TODO добавить быстрые клавиши
 
+//    probabilityTest()
+    cardProbability(1,CARDS_COUNT,93)
+
     Window(
         state = WindowState(position = WindowPosition(Alignment.Center)),
 //        undecorated = true,

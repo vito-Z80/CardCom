@@ -20,6 +20,28 @@ map:
 	dw NEW_EQUIPMENT
 	dw STRIP_MINE
 	dw REINFORCED_WALL
+end_map:
+probability:
+	db #02
+	db #01
+	db #01
+	db #02
+	db #01
+	db #01
+	db #01
+	db #01
+	db #01
+	db #02
+	db #01
+	db #01
+	db #01
+	db #01
+	db #01
+	db #01
+	db #02
+	db #01
+	db #01
+	db #03
 BRICK_SHORTAGE_DATA:
 	db #00	; cost: 0
 	; The currency is irrelevant when the price is zero.
