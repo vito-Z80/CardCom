@@ -14,6 +14,7 @@ import signChars
 import toAsmLabel
 import toByte
 import valueBy
+
 /*
 Вероятность можно вычислить по формуле:
 P = 1 / K, где K — коэффициент букмекера.
@@ -26,7 +27,6 @@ P = 1 / K, где K — коэффициент букмекера.
 
 // https://stackoverflow.com/questions/30492259/get-a-random-number-focused-on-center
 //
-
 
 
 private const val CALL_LOGIC = "\n\tcall logic"
@@ -78,7 +78,8 @@ object PlatformLogic {
 //            PEffect.specials(card?.specials?.value)
 //        }
 
-        logicCodeMap.append("\nend_map:")
+
+        asmCode.append("\nCARDS = ${AppData.cards?.size ?: 0}\t; max: ${16384 / 144} cards.")
         asmCode.append(logicCodeMap)
         // probability map
         asmCode.append("\nprobability:")

@@ -1,4 +1,5 @@
 	module CARD_LOGIC
+CARDS = 20	; max: 113 cards.
 map:
 	dw BRICK_SHORTAGE
 	dw LUCKY_CACHE
@@ -20,7 +21,6 @@ map:
 	dw NEW_EQUIPMENT
 	dw STRIP_MINE
 	dw REINFORCED_WALL
-end_map:
 probability:
 	db #02
 	db #01
