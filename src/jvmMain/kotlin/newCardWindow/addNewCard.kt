@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.WindowPosition
-import convert.PlatformSprite
 import file.getImageByPath
 import file.getImagePath
 import gson.NewCard
@@ -165,7 +164,7 @@ private fun inputCardCost(newCard: NewCard) {
        ) {
         Row {
             Text("Cost: ", modifier = Modifier.align(Alignment.CenterVertically))
-            BasicInput(newCard.cardCost, regOnlyDigit)
+            basicInput(newCard.cardCost, regOnlyDigit)
         }
         Column(modifier = Modifier.align(Alignment.CenterVertically), verticalArrangement = Arrangement.Center) {
             popupButton(

@@ -155,36 +155,26 @@ REINFORCED_WALL_DATA:
 	db #06	; currency: Bricks
 	db #00,#00,#08	; Player, Wall, +8
 BRICK_SHORTAGE:
-	ld hl,BRICK_SHORTAGE_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw BRICK_SHORTAGE_DATA
 	call LOGIC.resource_calc
 	ret
 LUCKY_CACHE:
-	ld hl,LUCKY_CACHE_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw LUCKY_CACHE_DATA
 	call LOGIC.exe_specials
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	ret
 FRIENDLY_TERRAIN:
-	ld hl,FRIENDLY_TERRAIN_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw FRIENDLY_TERRAIN_DATA
 	call LOGIC.exe_specials
 	call LOGIC.resource_calc
 	ret
 MINERS:
-	ld hl,MINERS_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw MINERS_DATA
 	call LOGIC.resource_calc
 	ret
 MOTHER_LODE:
-	ld hl,MOTHER_LODE_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw MOTHER_LODE_DATA
 	call LOGIC.exe_condition
 	jr nz,.falseContent
 	call LOGIC.resource_calc
@@ -194,51 +184,37 @@ MOTHER_LODE:
 	call LOGIC.resource_calc
 	ret
 DWARVEN_MINERS:
-	ld hl,DWARVEN_MINERS_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw DWARVEN_MINERS_DATA
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	ret
 WORK_OVERTIME:
-	ld hl,WORK_OVERTIME_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw WORK_OVERTIME_DATA
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	ret
 COPPING_THE_TECH:
-	ld hl,COPPING_THE_TECH_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw COPPING_THE_TECH_DATA
 	call LOGIC.exe_condition
 	ret nz
 	call LOGIC.assign_calc
 	ret
 BASIC_WALL:
-	ld hl,BASIC_WALL_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw BASIC_WALL_DATA
 	call LOGIC.resource_calc
 	ret
 STURDY_WALL:
-	ld hl,STURDY_WALL_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw STURDY_WALL_DATA
 	call LOGIC.resource_calc
 	ret
 INNOVATIONS:
-	ld hl,INNOVATIONS_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw INNOVATIONS_DATA
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	ret
 FOUNDATIONS:
-	ld hl,FOUNDATIONS_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw FOUNDATIONS_DATA
 	call LOGIC.exe_condition
 	jr nz,.falseContent
 	call LOGIC.resource_calc
@@ -248,55 +224,39 @@ FOUNDATIONS:
 	call LOGIC.resource_calc
 	ret
 TREMORS:
-	ld hl,TREMORS_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw TREMORS_DATA
 	call LOGIC.exe_specials
 	call LOGIC.resource_calc
 	ret
 SECRET_ROOM:
-	ld hl,SECRET_ROOM_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw SECRET_ROOM_DATA
 	call LOGIC.exe_specials
 	call LOGIC.resource_calc
 	ret
 EARTHQUAKE:
-	ld hl,EARTHQUAKE_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw EARTHQUAKE_DATA
 	call LOGIC.resource_calc
 	ret
 BIG_WALL:
-	ld hl,BIG_WALL_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw BIG_WALL_DATA
 	call LOGIC.resource_calc
 	ret
 COLLAPSE!:
-	ld hl,COLLAPSE!_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw COLLAPSE!_DATA
 	call LOGIC.resource_calc
 	ret
 NEW_EQUIPMENT:
-	ld hl,NEW_EQUIPMENT_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw NEW_EQUIPMENT_DATA
 	call LOGIC.resource_calc
 	ret
 STRIP_MINE:
-	ld hl,STRIP_MINE_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw STRIP_MINE_DATA
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	call LOGIC.resource_calc
 	ret
 REINFORCED_WALL:
-	ld hl,REINFORCED_WALL_DATA
-	call LOGIC.check_cost_currency
-	ret nz
+	dw REINFORCED_WALL_DATA
 	call LOGIC.resource_calc
 	ret
 	endmodule

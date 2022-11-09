@@ -17,10 +17,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import gson.NewCard
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import io.ktor.network.selector.*
+import io.ktor.network.sockets.*
+import io.ktor.util.*
+import io.ktor.utils.io.*
+import kotlinx.coroutines.*
+import java.net.Socket
 import kotlin.random.Random
 
 
@@ -225,7 +227,7 @@ fun inputDigit(inputText: MutableState<String?>?) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 @Composable
-fun BasicInput(inputText: MutableState<String?>?, regex: Regex) {
+fun basicInput(inputText: MutableState<String?>?, regex: Regex) {
     var error by remember { mutableStateOf(false) }
     BasicTextField(
         value = inputText?.value ?: Message.EMPTY, onValueChange = { it ->
@@ -385,7 +387,7 @@ fun probabilityTest() {
 
 fun cardProbability(prob: Int, cardCount: Int, cardId: Int) {
 
-    var obr:Int = 0
+    var obr: Int = 0
     var p = prob
     while (p > 0) {
         while (Random.nextInt(CARDS_COUNT - 1) != cardId) {
@@ -397,3 +399,134 @@ fun cardProbability(prob: Int, cardCount: Int, cardId: Int) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// https://ktor.io/docs/servers-raw-sockets.html#client_send
+@OptIn(InternalAPI::class)
+fun main() {
+    val request = "dump 0 10".toByteArray()
+
+    val socket = try {
+        val s = Socket("127.0.0.1", 30000)
+        val i = s.getInputStream()
+        val o = s.getOutputStream()
+
+        o.write(request)
+
+
+
+        val a = i.bufferedReader()
+        println(a.readLine())
+        println(a.readLine())
+
+        s.close()
+        s
+    } catch (e: Exception) {
+        println("No connect.")
+        return
+    }
+
+
+
+
+
+    return
+
+    val `is` = socket.getInputStream()
+    println("strat")
+    while (socket.isConnected && !socket.isClosed) {
+        println(socket.getInputStream().read())
+    }
+    println("end")
+
+    return
+//------------------------------------------
+
+    runBlocking {
+        val selectorManager = SelectorManager(Dispatchers.IO)
+        val socket = aSocket(selectorManager).tcp().connect("127.0.0.1", 30000)
+
+        val receiveChannel = socket.openReadChannel()
+        val sendChannel = socket.openWriteChannel(autoFlush = true)
+
+        launch(Dispatchers.IO) {
+            while (true) {
+                delay(20)
+                val dump = receiveChannel.readUTF8Line()?.replace("hello", "")
+                if (!dump.isNullOrEmpty()) {
+//                    val bytes = dump.decodeBase64Bytes()
+                    val size = dump.chunked(2).size
+                    println("$size: " + dump.chunked(2).joinToString())
+                } else {
+//                    println("Server closed a connection")
+//                    socket.close()
+//                    selectorManager.close()
+//                    exitProcess(0)
+                }
+            }
+        }
+
+        while (true) {
+            val myMessage = "dump 0 20"
+            sendChannel.writeStringUtf8("$myMessage\n")
+        }
+    }
+
+    return
+    val sm = SelectorManager(Dispatchers.IO)
+    val socet = runBlocking {
+        val socet = aSocket(sm).tcp().connect("127.0.0.1", 30000)//.tls(coroutineContext)
+        val send = socet.openWriteChannel(true)
+        send.writeStringUtf8("cpu\n")
+        val mes = socet.openReadChannel().readUTF8Line()
+        println(mes)
+        socet
+    }
+    socet.close()
+    sm.close()
+
+
+//    val client = HttpClient(Java) {
+//        install(WebSockets)
+//    }
+
+//    println(client)
+
+
+//    runBlocking {
+//        client.webSocket(HttpMethod.Get, "127.0.0.1", 30000, "reset") {
+//
+//        }
+//        client.webSocket(HttpMethod.Post,"127.0.0.1",30000,"reset"){
+//
+//        }
+
+
+//        val response = client.get("http://127.0.0.1:30000/") {
+//
+//            setBody("cpu")
+//        }
+//        println(response.bodyAsText())
+//        client.close()
+//    }
+
+//    CoroutineScope(Dispatchers.IO).launch {
+//
+//
+//        println("start")
+//        val res: HttpResponse = client.post("https://127.0.0.1:30000/post") {
+//            setBody("reset")
+////            url {
+////                protocol = URLProtocol.SOCKS
+////                host = "127.0.0.1:30000"
+////                path("debug")
+////            }
+////            println("method")
+//        }
+//        val b = res.status
+//        println("GET: $b")
+//        client.close()
+//
+//    }
+
+
+}

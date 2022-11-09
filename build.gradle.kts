@@ -14,6 +14,9 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven{
+        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+    }
 }
 
 
@@ -29,6 +32,13 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.windows_x64)
                 implementation("com.google.code.gson:gson:2.9.1")
+//                implementation("io.ktor:ktor-server-core:2.1.3")
+//                implementation("io.ktor:ktor-server-netty:2.1.3")
+                implementation("io.ktor:ktor-client-core:2.1.3")
+                implementation("io.ktor:ktor-client-cio:2.1.3")
+                implementation("io.ktor:ktor-client-websockets:2.1.3")
+                implementation("io.ktor:ktor-network-tls:2.1.3")
+                implementation("io.ktor:ktor-client-content-negotiation:2.1.3")
             }
         }
         val jvmTest by getting
