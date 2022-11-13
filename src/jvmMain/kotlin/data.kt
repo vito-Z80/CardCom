@@ -2,12 +2,34 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import gson.NewCard
+import io.ktor.utils.io.*
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.concurrent.TimeUnit
+
+
+object ZxData {
+    var xpeccyData: String by mutableStateOf("")
+
+    var socket: Socket? by mutableStateOf(null)
+    var input: InputStream? by mutableStateOf(null)
+    var output: OutputStream? by mutableStateOf(null)
+    var showConnectDialog by mutableStateOf(false)
+
+    var tryConnect by mutableStateOf(false)
+
+    var exPlayerData = mutableStateMapOf<String, Int>()
+    var exOpponentData = mutableStateMapOf<String, Int>()
+    var playerData = mutableStateMapOf<String, Int>()
+    var opponentData = mutableStateMapOf<String, Int>()
+
+
+}
 
 
 object AppData {
@@ -33,7 +55,7 @@ val cardImages = mutableMapOf<String?, ImageBitmap>()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 fun addLog(text: String, color: Color = Color.Black) {
-    val er = if (color == Color.Red) "[ERROR]" else ""
+    val er = if (color == Color.Red) "[ERROR]" else if (color == Color.Yellow) "[warning]" else ""
 
     // https://stackoverflow.com/questions/4142313/convert-timestamp-in-milliseconds-to-string-formatted-time-in-java
     val instant: Instant = Instant.ofEpochMilli(Date().time)

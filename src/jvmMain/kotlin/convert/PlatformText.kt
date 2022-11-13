@@ -6,18 +6,19 @@ import toAsmLabel
 
 object PlatformText {
 
-    const val TEXT_END = "#00"
+    const val TEXT_END = "END"
 
     val tab4reg = Regex(" {4}")
-    val tab3reg = Regex(" {3}")
+//    val tab3reg = Regex(" {3}")
     val tab2reg = Regex(" {2}")
     val nextLineReg = Regex("\n")
     val word = Regex("\\b\\w+\\b")
 
-    val nextLine = '\n'
-    val tab4 = (9).toChar()
-    val tab3 = (254).toChar()  // код 8 - похоже удаление символа, юзаем 254 и проверяем как пойдет в асм тексте
-    val tab2 = (255).toChar()
+//    val nextLine = '\n'
+    val nextLine = (251).toChar()
+    val tab4 = (252).toChar()
+//    val tab3 = (253).toChar()  // код 8 - похоже удаление символа, юзаем 254 и проверяем как пойдет в асм тексте
+    val tab2 = (254).toChar()
 
     val textMap = StringBuilder()
     val textData = StringBuilder()
@@ -36,8 +37,13 @@ object PlatformText {
         }
 
         if (moduleName != null) {
-            asmText.append("\tmodule $moduleName\n")
-            asmText.append("map:$textMap\n\ndata:\n$textData")
+            asmText.append("\tmodule $moduleName")
+            asmText.append("\nSPACE_2 = 255")
+//            asmText.append("\nSPACE_3 = 253")
+            asmText.append("\nSPACE_4 = 254")
+            asmText.append("\nNEW_LINE = 251")
+            asmText.append("\nEND = 0")
+            asmText.append("\nmap:$textMap\n\ndata:\n$textData")
             asmText.append("\n\tendmodule")
         } else {
             asmText.append("map:$textMap\n\ndata:\n$textData")
@@ -46,7 +52,7 @@ object PlatformText {
     }
 
     fun toAsm(cardName: String?, cardText: String?, byTokens: Boolean = false) =
-        "\n\tdb \"${cardName?.uppercase()}\",${hex2(nextLine)}" +
+        "\n\tdb \"${cardName?.uppercase()}\",NEW_LINE" +
                 "\n\tdb \"${tabs(cardText)?.uppercase()}\",$TEXT_END"
 
 
@@ -54,14 +60,16 @@ object PlatformText {
     // 4 пробела = код 9
     // 3 пробела = код 8
     // 2 пробела = код 7
-    private fun tabs(text: String?) = text?.trimEnd()?.replace(tab4reg, "\",${hex2(tab4)},\"")
-        ?.replace(tab3reg, "\",${hex2(tab3)},\"")
-        ?.replace(tab2reg, "\",${hex2(tab2)},\"")
-        ?.replace(nextLineReg, "\",${hex2(nextLine)},\"")
+    private fun tabs(text: String?) = text?.trimEnd()?.replace(tab4reg, "\",SPACE_4,\"")
+//        ?.replace(tab3reg, "\",SPACE_3,\"")
+        ?.replace(tab2reg, "\",SPACE_2,\"")
+        ?.replace(nextLineReg, "\",NEW_LINE,\"")
+        ?.replace("${(9).toChar()}","\",SPACE_4,\"")
+        ?.replace("\"\"","")
+        ?.replace(",,",",")
 
 }
 
-// TODO завершить компиляцию текста в модуль
 
 fun main() {
     val r = PlatformText.toAsm(

@@ -21,32 +21,62 @@ import convert.PlatformText
 import file.loadTemplate
 import file.saveData
 import file.saveTemplate
+import io.ktor.client.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.network.selector.*
+import io.ktor.network.sockets.*
+import io.ktor.utils.io.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.delay
+import java.net.Socket
+import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 @Composable
 fun mainMenu() {
     val expandFileDialog = remember { mutableStateOf(false) }
     val expandCardDialog = remember { mutableStateOf(false) }
+    val connectDialog = remember { mutableStateOf(false) }
+
+
+
+    LaunchedEffect(ZxData.tryConnect) {
+        if (ZxData.tryConnect && ZxData.socket == null) {
+            ZxData.tryConnect = false
+            ZxData.showConnectDialog = true
+            thread {
+
+                try {
+                    ZxData.socket = Socket("127.0.0.1", 30000)
+                    ZxData.input = ZxData.socket?.getInputStream()
+                    ZxData.output = ZxData.socket?.getOutputStream()
+                    val o = ZxData.output?.write("cpu".toByteArray())
+                    val r = ZxData.input?.bufferedReader()
+                    addLog(("Greetings: " + r?.readLine()) ?: "No connect.", Color.Magenta)
+                    r?.readLine()
+//                    addLog(r?.readLine() ?: "", Color.Blue)
+                } catch (_: Exception) {
+
+                }
+
+            }
+        }
+    }
 
     Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(2f.dp)
-            .background(color = Color.LightGray)
+        modifier = Modifier.fillMaxWidth().padding(2f.dp).background(color = Color.LightGray)
             .border(width = 1.dp, color = Color.DarkGray)
-    ) {
-        Text(text = "File", modifier = Modifier
-            .clickable {
-                expandFileDialog.value = true
-            }
-            .padding(4.dp)
-        ).apply { popupFileMenu(expandFileDialog) }
+       ) {
+        Text(text = "File", modifier = Modifier.clickable {
+            expandFileDialog.value = true
+        }.padding(4.dp)).apply { popupFileMenu(expandFileDialog) }
 
-        Text(text = "Card", modifier = Modifier
-            .clickable {
-                expandCardDialog.value = true
-            }
-            .padding(4.dp)
-        ).apply { popupCardMenu(expandCardDialog) }
+        Text(text = "Card", modifier = Modifier.clickable {
+            expandCardDialog.value = true
+        }.padding(4.dp)).apply { popupCardMenu(expandCardDialog) }
+        Text(text = "Connect", modifier = Modifier.clickable(enabled = !ZxData.showConnectDialog) {
+            ZxData.tryConnect = true
+        }.padding(4.dp))
     }
 }
 
@@ -65,7 +95,7 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
             println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||")
             val logic = PlatformLogic.convert("CARD_LOGIC")
             println(logic)
-            saveData(sprites = sprites,text = text, logic = logic)
+            saveData(sprites = sprites, text = text, logic = logic)
         }
     }
 

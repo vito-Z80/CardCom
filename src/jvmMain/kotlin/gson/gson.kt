@@ -4,15 +4,21 @@ import AppData
 import Message
 import Player
 import Variant
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import cardImages
 import com.google.gson.Gson
+import com.google.gson.InstanceCreator
+import io.ktor.util.reflect.*
 import name
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.impl.Log
 import java.io.File
+import java.lang.reflect.Type
+import kotlin.properties.Delegates
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 
 val gson = Gson()
@@ -39,7 +45,7 @@ fun prepareForDeserialize(serCards: DesCards) {
         try {
             cardImages["${it.imagePath}"] = Image.makeFromEncoded(
                 File("${it.imagePath}").readBytes()
-            ).toComposeImageBitmap()
+                                                                 ).toComposeImageBitmap()
         } catch (e: Exception) {
             Unit
         }
@@ -350,6 +356,61 @@ class SerializedCard {
 }
 
 
+//  https://hanru-yeh.medium.com/deserialize-classes-with-fields-by-delegate-crashes-when-using-gson-7c31fb5a792d
+fun main() {
+//    gson.newBuilder().instanceOf(Any::class)
+    val test = Example()
+//    val a = test.instanceOf(Any::class)
+
+//    test.name = "Hello"
+
+    val r = gson.toJson(test)
+    println(r.format())
+    val t = gson.fromJson(r, Example::class.java)
+    println(t.name.value)
+    test.name.value = "hello"
+    println(t.name.value)
+
+}
+
+fun Gson.mm() {
+
+}
+
+data class Example(
+     var name:MutableState<String> = mutableStateOf("First")
+                  ) {
+//    @Transient
+//    var name:MutableState<String> = mutableStateOf("First")
+
+//    operator fun getValue(thisRef: Any?, property: KProperty<*>) {
+//
+//    }
+}
+
+class TT<T : Any> : InstanceCreator<MutableState<T>> {
+//    operator fun getValue(thisRef: Any?, property: KProperty<*>): String {
+//        return "$thisRef"
+//    }
+//    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
+//
+//    }
+
+   var value: T
+        get() = TODO("Not yet implemented")
+        set(value) {}
+
+     fun component1(): T {
+        TODO("Not yet implemented")
+    }
+
+     fun component2(): (T) -> Unit {
+        TODO("Not yet implemented")
+    }
+
+    override fun createInstance(type: Type?): MutableState<T> {
+        TODO("Not yet implemented")
+    }
 
 
-
+}

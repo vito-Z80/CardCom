@@ -12,21 +12,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import mainMenu.mainMenu
+import mainMenu.xpeccyConnect
 import theme.MyTheme
 
 @Composable
 fun App() {
     remember { AppData }
+    remember { ZxData }
 
     MyTheme {
 
         if (AppData.showCardDialog) {
             newCardDialog(AppData.tmpCard)
         }
+        if (ZxData.showConnectDialog) {
+            xpeccyConnect()
+        }
 
         Scaffold(topBar = {
             mainMenu()
-        }){
+        }) {
             appContent()
         }
 
@@ -38,7 +43,7 @@ fun main() = application {
     // TODO добавить быстрые клавиши
 
 //    probabilityTest()
-    cardProbability(1,CARDS_COUNT,93)
+    cardProbability(1, CARDS_COUNT, 93)
 
     Window(
         state = WindowState(position = WindowPosition(Alignment.Center)),
