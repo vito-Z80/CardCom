@@ -12,9 +12,8 @@ object Message {
 enum class Specials {
     // 0,1,2,4
     PLAY_AGAIN,
-    DRAW,
-    `CAN'T_DISCARD`,
-    DISCARD;
+    PDP,            // play, discard any card, play again/
+    CANT_DISCARD;
 }
 
 enum class Variant {
@@ -63,12 +62,14 @@ enum class Structure {
 }
 
 enum class Sign {
-    // 0,1,2,4,8
+    // 0,1,2,4,8,16,32
     LESS,
     MORE,
     EQUAL,
     MORE_E,
-    LESS_E;
+    LESS_E,
+    MORE_NOT_E,
+    LESS_NOT_E,
 }
 
 fun Sign.signChars() = when (this) {
@@ -77,6 +78,8 @@ fun Sign.signChars() = when (this) {
     Sign.EQUAL -> "="
     Sign.MORE_E -> ">="
     Sign.LESS_E -> "<="
-    else -> error("No have this sign ${this.name}")
+    Sign.MORE_NOT_E -> ">!="
+    Sign.LESS_NOT_E -> "<!="
+    else -> error("No have sign ${this.name}")
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -290,7 +290,7 @@ fun Int.valueBy(bitMask: BitMask = BitMask.ORDER): Int {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 fun Color.byResource(res: Structure) = when (res) {
     Structure.WALL -> Color.LightGray
-    Structure.TOWER -> Color.DarkGray
+    Structure.TOWER -> Color.LightGray
     Structure.QUARRY -> Color(207, 95, 107, 255)
     Structure.BRICKS -> Color(207, 95, 107, 255)
     Structure.MAGIC -> Color(123, 168, 207, 255)

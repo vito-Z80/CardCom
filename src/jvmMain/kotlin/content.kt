@@ -58,7 +58,7 @@ fun logWindow() {
 
     val listState = rememberLazyListState()
 
-    LaunchedEffect(AppData.logText.size){
+    LaunchedEffect(AppData.logText.size) {
 //        listState.animateScrollToItem(AppData.logText.size)
         listState.scrollToItem(AppData.logText.size)
     }
@@ -69,8 +69,11 @@ fun logWindow() {
             .border(width = 1f.dp, color = Color.Blue).padding(4f.dp)
               ) {
         items(count = AppData.logText.size, key = null) {
-            Text(text = AppData.logText[it].first, color = AppData.logText[it].second, style = MaterialTheme
-                .typography.h3)
+            Text(
+                text = AppData.logText[it].first,
+                color = AppData.logText[it].second,
+                style = MaterialTheme.typography.h3
+                )
         }
 
     }
@@ -89,6 +92,12 @@ private fun con() {
             AppData.tmpCard = card
             AppData.showCardDialog = true
         }.background(color = bgColor).border(width = 1.dp, color = Color.LightGray)) {
+            // index
+            Text(
+                text = id.toString(), modifier = Modifier.padding(start = 4f.dp).width(24f.dp).align(
+                    Alignment.CenterVertically
+                                                                                                    )
+                )
             // card image
             if (card?.imagePath != null) {
                 cardImages[card.imagePath.value]?.let {

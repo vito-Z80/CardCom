@@ -29,13 +29,13 @@ P = 1 / K, где K — коэффициент букмекера.
 //
 
 
-private const val CALL_LOGIC = "\n\tcall logic"
 private const val PUSH_DE = "\n\tpush de"
-private const val CALL_SPECIALS = "\n\tcall LOGIC.exe_specials"
-private const val CALL_EFFECT = "\n\tcall LOGIC.resource_calc"
-private const val CALL_CONDITION = "\n\tcall LOGIC.exe_condition"
+private const val CALL_LOGIC = "call LOGIC"
+private const val CALL_SPECIALS = "\n\t$CALL_LOGIC.exe_specials"
+private const val CALL_EFFECT = "\n\t$CALL_LOGIC.resource_calc"
+private const val CALL_CONDITION = "\n\t$CALL_LOGIC.exe_condition"
 
-private const val CALL_CHECK_COST_CURRENCY = "call LOGIC.check_cost_currency\n\tret nz"
+private const val CALL_CHECK_COST_CURRENCY = "$CALL_LOGIC.check_cost_currency\n\tret nz"
 private const val RET = "\n\tret"
 
 private val logicData = StringBuilder()
@@ -60,13 +60,15 @@ object PlatformLogic {
             val label = card?.cardName?.value?.toAsmLabel() ?: error(" Wrong card label : $this")
             logicCodeMap.append("\n\tdw $label")
             logicData.append("\n${label}_DATA:")
-            costCurrency(card)
+            val specData = PEffect.specials(card, card.specials.value)
+            costCurrency(card, specData)
             logicCode.append("\n${label}:")
             logicCode.append("\n\tdw ${label}_DATA")
 //            logicCode.append("\n\t$CALL_CHECK_COST_CURRENCY")
-            PEffect.specials(card, card.specials.value)
             PEffect.effect(card, card.effects.value)
             PEffect.co(card, card.condition, label)
+            PEffect.specials(card, card.specials.value)
+
             logicCode.append(RET)
         }
 
@@ -104,18 +106,18 @@ object PlatformLogic {
      * В ASM коде нужно учитывать когда цена рава нулю. Следующим байтом сразу будут идти данные эфекта.
      * Данные о валютном ресурсе будут отсутствовать.
      */
-    private fun costCurrency(card: NewCard?) {
+    private fun costCurrency(card: NewCard?, specData: Pair<Int, String>) {
         val c = (card?.cardCost?.value?.toByte() ?: 0).toByte()
 //        val cost = (0 - c).toByte().hex()
-        val cost = card?.cardCost?.value?.toByte().let {
-            if (it == null) null else (0 - it).toByte().hex()
+        val cost = card?.cardCost?.value?.let {
+            (it.toInt() or specData.first).toByte().hex()
         }
         val currency = Structure.values().indexOfFirst { it.name == card?.costCurrency?.value?.uppercase() }.let {
             if (it >= 0) it.valueBy(BitMask.WORD).toByte().hex() else null
         }
         if (cost != null) {
             logicData.append("\n\tdb $cost")
-            logicData.append("\t; cost: ${card?.cardCost?.value}")
+            logicData.append("\t; cost: $c, ${specData.second}")
         } else {
             addLog("Cost not set for card: ${card?.cardName?.value?.uppercase()}", Color.Red)
         }
@@ -229,7 +231,7 @@ object PEffect {
         logicData.append("\t; ${e.player.value}, ${e.structure.value}, ${e.value.value}")
 
 //        val effectCounter = if (effects.size < 2) "" else "_${effects.size}"
-        logicCode.append(CALL_EFFECT)
+//        logicCode.append(CALL_EFFECT)
     }
 
     fun effect(card: NewCard?, effects: List<NewCard.Effect?>?) {
@@ -242,23 +244,39 @@ object PEffect {
                     Color.Red
                       )
             }
+            var gCount = 0
+            var aCount = 0
+            var sCount = 0
             effects.forEach { e ->
                 when (e?.variant?.value) {
                     Variant.GENERAL, Variant.GET_HALF -> {
                         general(e)
+                        gCount++
                     }
 
                     Variant.ASSIGN -> {
                         assign(e)
+                        aCount++
                     }
 
                     Variant.SWITCH, Variant.SEIZE, Variant.HIGHEST, Variant.LOWEST -> {
                         switch(e)
+                        sCount++
                     }
 
                     else -> {}
                 }
             }
+            if (gCount > 0) {
+                logicCode.append("${CALL_EFFECT}${if (gCount > 1) "_$gCount" else ""}")
+            }
+            if (aCount > 0) {
+
+            }
+            if (sCount > 0) {
+
+            }
+
         }
     }
 
@@ -267,7 +285,16 @@ object PEffect {
     //                                 C O N D I T I O N                                       //
     //                                                                                         //
     /////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
+    signs:
+    <       ; true - <, false - >=
+    >       ; true - >, false - <=
+    ==      ; true - ==, false - !=
+    <=      ; true - <=, false - >
+    >=      ; true - >=, false - <
+    >!=     ; true - >, false - <, == none
+    <!=     ; true - <, false - >, == none
+ */
     fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?, label: String) {
         if (condition?.value == null) return
         // value берется с rightPart value и rightPart не используется если value != 255
@@ -348,33 +375,27 @@ object PEffect {
     //                                                                                         //
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    fun specials(card: NewCard?, specials: NewCard.Special?) {
-        if (specials == null) return
-        var specialCounter = 0
+    fun specials(card: NewCard?, specials: NewCard.Special?): Pair<Int, String> {
+        if (specials == null) return Pair(0, " | No specials")
+        var value = 0
+        val description = StringBuilder()
 
-        fun setSpec(specialIndex: Int) {
-            // special value
-            logicData.append("\n\tdb ")
-            logicData.append("${specialIndex.toByte().hex()}\t; special")
-            specialCounter++
-        }
         if (specials.playAgain.value == true) {
-            setSpec(0)
-            logicData.append(" | Play again")
+            value = value or 0x40
+            description.append(" | Play again")
         }
-        if (specials.draw.value == true) {
-            setSpec(1)
-            logicData.append(" | Draw")
+        if (specials.pdp.value == true) {
+            value = value or 0x80
+            description.append(" | Play, Discard any, Play again")
         }
-        if (specials.notDiscard.value == true) {
-            setSpec(2)
-            logicData.append(" | Can`t discard")
+        if (specials.cantDiscard.value == true) {
+            value = value or 0x20
+            description.append(" | Can`t discard")
         }
-        if (specials.discard.value == true) {
-            setSpec(4)
-            logicData.append(" | Discard")
-        }
-        logicCode.append(CALL_SPECIALS + if (specialCounter < 2) "" else "_${specialCounter}")
+        return Pair(value, description.toString())
     }
 
 }
+
+
+// FIXME lucky cache не работает play again

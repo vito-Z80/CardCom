@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+//    id("io.alcide.gradle-semantic-build-versioning") version "4.2.2"
 }
 
 group = "com.serdjuk"
@@ -16,6 +17,7 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven{
         url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+//        url = uri("https://plugins.gradle.org/m2/")
     }
 }
 
@@ -40,6 +42,8 @@ kotlin {
 //                implementation("io.ktor:ktor-network:2.1.3")
                 implementation("io.ktor:ktor-network-tls:2.1.3")
                 implementation("io.ktor:ktor-client-content-negotiation:2.1.3")
+                implementation("org.xerial:sqlite-jdbc:3.39.3.0")
+//                implementation("io.alcide:gradle-semantic-build-versioning:4.2.2")
             }
         }
         val jvmTest by getting
@@ -56,3 +60,5 @@ compose.desktop {
         }
     }
 }
+
+//apply(plugin = "io.alcide.gradle-semantic-build-versioning")

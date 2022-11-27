@@ -5,20 +5,15 @@ import Message
 import Player
 import Variant
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import cardImages
 import com.google.gson.Gson
 import com.google.gson.InstanceCreator
-import io.ktor.util.reflect.*
 import name
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.impl.Log
 import java.io.File
 import java.lang.reflect.Type
-import kotlin.properties.Delegates
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 
 
 val gson = Gson()
@@ -90,10 +85,9 @@ private fun cardToSerialize(card: NewCard): SerializedCard {
     }
     if (card.specials.value != null) {
         serializedCard.specials = SerializedCard.Special().apply {
-            discard = card.specials.value?.discard?.value
-            notDiscard = card.specials.value?.notDiscard?.value
+            cantDiscard = card.specials.value?.cantDiscard?.value
             playAgain = card.specials.value?.playAgain?.value
-            drop = card.specials.value?.draw?.value
+            pdp = card.specials.value?.pdp?.value
         }
     }
     if (card.condition.value != null) {
@@ -192,10 +186,9 @@ private fun cardToDeserialize(serializedCard: SerializedCard): NewCard {
     }
     if (serializedCard.specials != null) {
         newCards.specials.value = NewCard.Special().apply {
-            discard.value = serializedCard.specials?.discard
-            notDiscard.value = serializedCard.specials?.notDiscard
+            cantDiscard.value = serializedCard.specials?.cantDiscard
             playAgain.value = serializedCard.specials?.playAgain
-            draw.value = serializedCard.specials?.drop
+            pdp.value = serializedCard.specials?.pdp
         }
     }
     if (serializedCard.condition != null) {
@@ -270,9 +263,8 @@ class NewCard {
 
     class Special {
         var playAgain: MutableState<Boolean?> = mutableStateOf(null)
-        var draw: MutableState<Boolean?> = mutableStateOf(null)
-        var discard: MutableState<Boolean?> = mutableStateOf(null)
-        var notDiscard: MutableState<Boolean?> = mutableStateOf(null)
+        var pdp: MutableState<Boolean?> = mutableStateOf(null)
+        var cantDiscard: MutableState<Boolean?> = mutableStateOf(null)
     }
 
     class Condition {
@@ -326,9 +318,8 @@ class SerializedCard {
 
     class Special {
         var playAgain: Boolean? = null
-        var drop: Boolean? = null
-        var discard: Boolean? = null
-        var notDiscard: Boolean? = null
+        var pdp: Boolean? = null
+        var cantDiscard: Boolean? = null
     }
 
     class Condition {
