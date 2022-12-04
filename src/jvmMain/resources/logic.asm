@@ -25,29 +25,29 @@ map:
 	dw LODESTONE
 	dw FLOOD_WATER
 probability:
-	db #02
-	db #01
 	db #01
 	db #02
-	db #01
-	db #01
-	db #01
-	db #01
+	db #03
 	db #01
 	db #02
-	db #01
-	db #01
-	db #01
-	db #01
-	db #01
+	db #03
 	db #01
 	db #02
+	db #03
+	db #02
+	db #03
+	db #02
+	db #03
+	db #01
+	db #02
+	db #03
+	db #02
+	db #01
 	db #01
 	db #01
 	db #03
-	db #01
-	db #01
-	db #01
+	db #02
+	db #03
 BRICK_SHORTAGE_DATA:
 	db #00	; cost: 0,  | No specials
 	; The currency is irrelevant when the price is zero.
@@ -157,12 +157,12 @@ REINFORCED_WALL_DATA:
 	db #06	; currency: Bricks
 	db #00,#00,#08	; Player, Wall, +8
 ELVEN_SCOUT_DATA:
-	db #82	; cost: 2,  | Play, Discard any, Play again
+	db #C2	; cost: 2,  | Play again | Play, Discard any, Play again
 	db #0E	; currency: Recruits
 LODESTONE_DATA:
 	db #25	; cost: 5,  | Can`t discard
 	db #0A	; currency: Gems
-	db #00,#02,#08	; Player, Tower, +8
+	db #00,#02,#03	; Player, Tower, +3
 FLOOD_WATER_DATA:
 	db #06	; cost: 6,  | No specials
 	db #06	; currency: Bricks

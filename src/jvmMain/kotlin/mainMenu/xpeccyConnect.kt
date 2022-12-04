@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
+
 package mainMenu
 
 import AppData
@@ -9,11 +11,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -32,8 +44,11 @@ import java.sql.DriverManager
 import java.sql.SQLException
 import kotlin.concurrent.thread
 
+
+//  https://github.com/JetBrains/compose-jb/tree/master/tutorials/Mouse_Events
+
 // TODO пока игра пилица - адрес дампа плавающий.
-val request = "dumpraw 73BC 44\r\n".toByteArray()
+val request = "dumpraw 74C2 44\r\n".toByteArray()
 
 private val bg = Color.DarkGray
 
@@ -87,7 +102,7 @@ private fun xpeccyWindow() {
         }, resizable = false
           ) {
 
-        Row() {
+        Row(modifier = Modifier.background(color = Color.LightGray)) {
             if (ZxData.xpeccyData.isNotEmpty()) {
                 val player = ZxData.xpeccyData.substring(64, 76)
                 val opponent = ZxData.xpeccyData.substring(76, 88)
@@ -132,6 +147,7 @@ private fun xpeccyWindow() {
 private fun cards(byte: StringBuilder, player: String) {
 
     for (i in player.indices step 2) {
+        var mulColor by remember { mutableStateOf(Color.LightGray) }
         byte.clear()
         byte.append(player[i])
         byte.append(player[i + 1])
@@ -144,7 +160,15 @@ private fun cards(byte: StringBuilder, player: String) {
             Color.Red
         }
         Column(
-            modifier = Modifier.padding(2f.dp).requiredWidth(70f.dp), horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(2f.dp).requiredWidth(70f.dp)
+                .onPointerEvent(PointerEventType.Enter) { mulColor = Color.White }
+                .onPointerEvent(PointerEventType.Exit) {  mulColor = Color.LightGray }
+                .onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) { event ->
+                    if (event.buttons.isSecondaryPressed) {
+                        println("${AppData.cards?.get(id)?.cardName?.value}")
+                    }
+                }.border(width = 1f.dp, color = mulColor).padding(2f.dp), horizontalAlignment = Alignment
+                .CenterHorizontally
               ) {
 
             val cardImage = cardImages[AppData.cards?.get(id)?.imagePath?.value]
@@ -161,9 +185,9 @@ private fun cards(byte: StringBuilder, player: String) {
                     contentDescription = null,
                     filterQuality = FilterQuality.None,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
-
                      )
                 Column(modifier = Modifier.fillMaxWidth().border(width = 1f.dp, color = Color.Yellow).padding(4f.dp)) {
+                    Text(text = "Id: #${String.format("%02X", id)}", style = MaterialTheme.typography.h4)
                     Text(text = "Cost: ${AppData.cards?.get(id)?.cardCost?.value}", style = MaterialTheme.typography.h4)
                     Text(
                         text = "Prob: ${AppData.cards?.get(id)?.probability?.value ?: 1}",
@@ -187,8 +211,7 @@ private val str = StringBuilder()
 @Composable
 private fun playerResourceLabels(strData: String) {
     Column(
-        modifier = Modifier.border(width = 1f.dp, color = Color.LightGray)
-            .padding(4f.dp),
+        modifier = Modifier.border(width = 1f.dp, color = Color.LightGray).padding(4f.dp),
         verticalArrangement = Arrangement.SpaceAround,
 
 
