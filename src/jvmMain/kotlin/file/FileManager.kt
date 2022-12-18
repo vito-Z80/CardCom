@@ -31,7 +31,7 @@ internal fun getImagePath(): String? {
     chooser.dialogTitle = "Load image"
     val returnVal = chooser.showOpenDialog(window)
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-        Log.info("Get image file path: ${chooser.selectedFile.absoluteFile}")
+        Log.info("Get image file: ${chooser.selectedFile.absoluteFile}")
 
         return chooser.selectedFile.toString()
     }

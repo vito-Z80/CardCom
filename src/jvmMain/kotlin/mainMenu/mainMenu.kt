@@ -18,16 +18,10 @@ import androidx.compose.ui.unit.dp
 import convert.PlatformLogic
 import convert.PlatformSprite
 import convert.PlatformText
+import convert.convertWindow
 import file.loadTemplate
 import file.saveData
 import file.saveTemplate
-import io.ktor.client.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.network.selector.*
-import io.ktor.network.sockets.*
-import io.ktor.utils.io.*
-import io.ktor.websocket.*
-import kotlinx.coroutines.delay
 import java.net.Socket
 import kotlin.concurrent.thread
 import kotlin.system.exitProcess
@@ -83,6 +77,8 @@ fun mainMenu() {
 @Composable
 fun popupCardMenu(expand: MutableState<Boolean>) {
 
+    val showConvertDialog = remember { mutableStateOf(false) }
+
     LaunchedEffect(AppData.convert) {
         if (AppData.convert) {
             AppData.convert = false
@@ -109,11 +105,13 @@ fun popupCardMenu(expand: MutableState<Boolean>) {
 
         DropdownMenuItem(onClick = {
             expand.value = false
-            AppData.convert = true
+            showConvertDialog.value = true
         }) {
             Text(text = "Convert")
         }
     }
+
+    convertWindow(showConvertDialog)
 }
 
 @Composable

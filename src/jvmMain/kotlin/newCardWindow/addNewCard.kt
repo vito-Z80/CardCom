@@ -29,7 +29,6 @@ import newCardWindow.*
 @Composable
 fun newCardDialog(card: NewCard? = NewCard()) {
 
-    //  https://stackoverflow.com/questions/68852110/show-custom-alert-dialog-in-jetpack-compose
 
     var newCard: NewCard? by mutableStateOf(card ?: NewCard())
 
