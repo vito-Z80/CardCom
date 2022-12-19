@@ -10,6 +10,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import convert.PlatformSprite
 import mainMenu.mainMenu
 import mainMenu.xpeccyConnect
 import theme.MyTheme
@@ -18,6 +19,7 @@ import theme.MyTheme
 fun App() {
     remember { AppData }
     remember { ZxData }
+//    PlatformSprite.test()
 
     MyTheme {
 

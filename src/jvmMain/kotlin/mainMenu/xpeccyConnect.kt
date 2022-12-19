@@ -48,7 +48,7 @@ import kotlin.concurrent.thread
 //  https://github.com/JetBrains/compose-jb/tree/master/tutorials/Mouse_Events
 
 // TODO пока игра пилица - адрес дампа плавающий.
-val request = "dumpraw 719E 44\r\n".toByteArray()
+val request = "dumpraw 72A0 44\r\n".toByteArray()
 
 private val bg = Color.DarkGray
 

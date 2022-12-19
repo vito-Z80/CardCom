@@ -1,5 +1,5 @@
 	module CARD_LOGIC
-CARDS = 6	; max: 113 cards.
+CARDS = 7	; max: 113 cards.
 map:
 	dw MOTHER_LODE
 	dw COPPING_THE_TECH
@@ -7,6 +7,7 @@ map:
 	dw FLOOD_WATER
 	dw BARRACKS
 	dw FOUNDATIONS
+	dw THIEF
 probability:
 	db #03
 	db #02
@@ -14,6 +15,7 @@ probability:
 	db #03
 	db #02
 	db #03
+	db #02
 MOTHER_LODE_DATA:
 	db #04	; cost: 4,  | No specials
 	db #06	; currency: Bricks
@@ -35,7 +37,7 @@ COPPING_THE_TECH_DATA:
 	db #04	; Quarry
 	db #01	; Enemy
 	db #04	; Quarry
-	db #FF,#04,#00	; value, Quarry,  Player [enemy Quarry value copy to player]
+	db #FF,#04,#01	; value, Quarry,  Enemy [enemy Quarry value copy to player]
 	db #FF	; no false content in condition.
 WORK_OVERTIME_DATA:
 	db #02	; cost: 2,  | No specials
@@ -79,6 +81,13 @@ FOUNDATIONS_DATA:
 	db #00,#00,#06	; Player, Wall, +6
 FOUNDATIONS_DATA_FALSE:
 	db #00,#00,#03	; Player, Wall, +3
+THIEF_DATA:
+	db #0C	; cost: 12,  | No specials
+	db #0E	; currency: Recruits
+	db #01,#0A,#F6	; Enemy, Gems, -10
+	db #01,#06,#FB	; Enemy, Bricks, -5
+	db #00,#0A,#05	; Player, Gems, +5
+	db #00,#06,#03	; Player, Bricks, +3
 MOTHER_LODE:
 	dw MOTHER_LODE_DATA
 	call LOGIC.exe_condition
@@ -125,5 +134,9 @@ FOUNDATIONS:
 .falseContent:
 	ld hl,FOUNDATIONS_DATA_FALSE
 	call LOGIC.resource_calc
+	ret
+THIEF:
+	dw THIEF_DATA
+	call LOGIC.resource_calc_4
 	ret
 	endmodule

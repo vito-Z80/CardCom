@@ -4,6 +4,8 @@ import AppData
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
 import cardImages
+import file.getImageByPath
+import file.getImagePath
 import hex
 import toAsmLabel
 import java.util.*
@@ -90,7 +92,7 @@ object PlatformSprite {
                 dbLine8(sprite.copyOfRange(i, i + SYMBOL_SIZE), spriteData)
             }
             spriteData.append("\n; attributes")
-            for (i in 0 until(attributes?.size ?: 0) step SYMBOL_SIZE) {
+            for (i in 0 until (attributes?.size ?: 0) step SYMBOL_SIZE) {
                 dbLine8(attributes?.copyOfRange(i, i + SYMBOL_SIZE), spriteData)
             }
 
@@ -179,8 +181,10 @@ object PlatformSprite {
                         // TODO сделать что бы биты ставились по уникальному цвету которого меньше всего в символе
                         //  а лишние цвета приравнивать к ближайшему уникальному цвету
                         val pix = pm[x + inX, y + inY].value
-                        if (uniqueColors[1] == pix) {
-                            byte = byte or bit
+                        if (uniqueColors.size > 1) {
+                            if (uniqueColors[1] == pix) {
+                                byte = byte or bit
+                            }
                         }
                         bit = bit shr 1
                     }
@@ -191,4 +195,42 @@ object PlatformSprite {
         }
         return Pair(symbolSprites, attributes.toByteArray())
     }
+
+
+    fun rgbAttributes(pm: PixelMap?): ArrayList<List<ULong>>? {
+        if (pm != null) {
+            val rgb = ArrayList<List<ULong>>()
+            // get all pixels as symbols 8x8
+            for (y in 0 until pm.height step 8) {
+                for (x in 0 until pm.width step 8) {
+                    val attribute = ArrayList<ULong>()
+                    repeat(SYMBOL_SIZE) { sY ->
+                        repeat(SYMBOL_SIZE) { sX ->
+                            val color = pm[x + sX, y + sY].value
+                            attribute.add(color)
+                        }
+                    }
+                    rgb.add(attribute)
+                }
+            }
+            // данные атрибутов в ulong может быть больше 2-х цветов.
+            val rgbAttributes = ArrayList<List<ULong>>()
+            rgb.forEach { attribute ->
+                rgbAttributes.add(TreeSet(attribute).sortedBy { attribute.count { c -> c == it } })
+            }
+            return rgbAttributes
+        }
+        return null
+    }
+
+    fun test() {
+        getImagePath()
+
+        val ra = rgbAttributes(getImageByPath().toPixelMap())
+        ra?.forEach {
+            println(it.joinToString())
+        }
+        println("SIZE: ${ra?.size}")
+    }
+
 }
