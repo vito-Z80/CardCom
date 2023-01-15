@@ -138,18 +138,11 @@ fun effect(card: NewCard?, eff: NewCard.Effect?) {
             })
 
         Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-            if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL || eff.variant.value == Variant.ASSIGN) {
+            if (eff?.variant?.value == null || eff.variant.value == Variant.GENERAL/* || eff.variant.value == Variant.ASSIGN*/) {
                 effectLabel(card, eff?.player, Player.values().map { it.name() }, Player.PLAYER.name())
                 effectLabel(card, eff?.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
                 inputDigit(eff?.value)
-            } else if (eff.variant.value == Variant.GET_HALF) {
-                eff.player.value = Player.ENEMY.name()
-                effectLabel(
-                    card, eff.player, Player.values().map { it.name() }, Player.PLAYER.name(), mutableStateOf(false)
-                           )
-                effectLabel(card, eff.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
-                inputDigit(eff.value)
-            } else {
+            }  else {
                 effectLabel(card, eff.structure, Structure.values().map { it.name() }, Message.STRUCTURE)
             }
         }

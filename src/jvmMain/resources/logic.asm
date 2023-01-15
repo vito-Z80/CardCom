@@ -1,5 +1,5 @@
 	module CARD_LOGIC
-CARDS = 7	; max: 113 cards.
+CARDS = 13	; max: 113 cards.
 map:
 	dw MOTHER_LODE
 	dw COPPING_THE_TECH
@@ -8,6 +8,12 @@ map:
 	dw BARRACKS
 	dw FOUNDATIONS
 	dw THIEF
+	dw SHIFT
+	dw LUCKY_CACHE
+	dw PRISM
+	dw LODESTONE
+	dw PARITY
+	dw ASDFSAF
 probability:
 	db #03
 	db #02
@@ -16,6 +22,12 @@ probability:
 	db #02
 	db #03
 	db #02
+	db #02
+	db #01
+	db #01
+	db #02
+	db #02
+	db #01
 MOTHER_LODE_DATA:
 	db #04	; cost: 4,  | No specials
 	db #06	; currency: Bricks
@@ -37,7 +49,7 @@ COPPING_THE_TECH_DATA:
 	db #04	; Quarry
 	db #01	; Enemy
 	db #04	; Quarry
-	db #FF,#04,#01	; value, Quarry,  Enemy [enemy Quarry value copy to player]
+	db #04	; Assign rival Quarry value
 	db #FF	; no false content in condition.
 WORK_OVERTIME_DATA:
 	db #02	; cost: 2,  | No specials
@@ -88,6 +100,29 @@ THIEF_DATA:
 	db #01,#06,#FB	; Enemy, Bricks, -5
 	db #00,#0A,#05	; Player, Gems, +5
 	db #00,#06,#03	; Player, Bricks, +3
+SHIFT_DATA:
+	db #11	; cost: 17,  | No specials
+	db #06	; currency: Bricks
+	db #00	; Switch Wall`s
+LUCKY_CACHE_DATA:
+	db #40	; cost: 0,  | Play again
+	; The currency is irrelevant when the price is zero.
+	db #00,#06,#02	; Player, Bricks, +2
+	db #00,#0A,#02	; Player, Gems, +2
+PRISM_DATA:
+	db #82	; cost: 2,  | Play, Discard any, Play again
+	db #0A	; currency: Gems
+LODESTONE_DATA:
+	db #25	; cost: 5,  | Can`t discard
+	db #0A	; currency: Gems
+	db #00,#02,#03	; Player, Tower, +3
+PARITY_DATA:
+	db #07	; cost: 7,  | No specials
+	db #0A	; currency: Gems
+	db #08	; by Highest Magic`s
+ASDFSAF_DATA:
+	db #40	; cost: 0,  | Play again
+	; The currency is irrelevant when the price is zero.
 MOTHER_LODE:
 	dw MOTHER_LODE_DATA
 	call LOGIC.exe_condition
@@ -138,5 +173,27 @@ FOUNDATIONS:
 THIEF:
 	dw THIEF_DATA
 	call LOGIC.resource_calc_4
+	ret
+SHIFT:
+	dw SHIFT_DATA
+	call LOGIC.switch_calc
+	ret
+LUCKY_CACHE:
+	dw LUCKY_CACHE_DATA
+	call LOGIC.resource_calc_2
+	ret
+PRISM:
+	dw PRISM_DATA
+	ret
+LODESTONE:
+	dw LODESTONE_DATA
+	call LOGIC.resource_calc
+	ret
+PARITY:
+	dw PARITY_DATA
+	call LOGIC.highest_calc
+	ret
+ASDFSAF:
+	dw ASDFSAF_DATA
 	ret
 	endmodule

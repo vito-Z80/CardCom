@@ -14,6 +14,7 @@ import signChars
 import toAsmLabel
 import toByte
 import valueBy
+import kotlin.random.Random
 
 /*
 Вероятность можно вычислить по формуле:
@@ -109,17 +110,21 @@ object PlatformLogic {
     private fun costCurrency(card: NewCard?, specData: Pair<Int, String>) {
         val c = (card?.cardCost?.value?.toByte() ?: 0).toByte()
 //        val cost = (0 - c).toByte().hex()
-        val cost = card?.cardCost?.value?.let {
-            (it.toInt() or specData.first).toByte().hex()
-        }
+//        val cost = card?.cardCost?.value?.let {
+//            (it.toInt() or specData.first).toByte().hex()
+//        }
+
+        val cost = ((card?.cardCost?.value ?: "0").toInt() or specData.first).toByte().hex()
         val currency = Structure.values().indexOfFirst { it.name == card?.costCurrency?.value?.uppercase() }.let {
             if (it >= 0) it.valueBy(BitMask.WORD).toByte().hex() else null
         }
-        if (cost != null) {
-            logicData.append("\n\tdb $cost")
-            logicData.append("\t; cost: $c, ${specData.second}")
-        } else {
-            addLog("Cost not set for card: ${card?.cardName?.value?.uppercase()}", Color.Red)
+        logicData.append("\n\tdb $cost")
+        logicData.append("\t; cost: $c, ${specData.second}")
+        if (c == 0.toByte()) {
+            addLog(
+                "The price has not been set for the ${card?.cardName?.value?.uppercase()} card or is set to 0.",
+                Color.Yellow
+            )
         }
 
         if (currency != null) {
@@ -154,14 +159,14 @@ object PEffect {
     private fun switch(e: NewCard.Effect) {
         // variant,structure
         logicData.append("\n\tdb ")
-        // variant
-        logicData.append("${Variant.values().indexOf(e.variant.value).valueBy(BitMask.BIT).toByte().hex()},")
         // structure
         logicData.append(
-            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.BIT).toByte()
+            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.WORD).toByte()
                 .hex()
-                        )
-        logicData.append("\t; effect: ${e.variant.value}, ${e.structure.value}")
+        )
+        val ending = if (e.structure.value?.endsWith("s") == true) "" else "`s"
+        logicData.append("\t; Switch ${e.structure.value}$ending")
+        logicCode.append("\n\tcall LOGIC.switch_calc")
     }
 
     /*
@@ -177,24 +182,25 @@ object PEffect {
         // effect variant
 //        logicData.append("${Variant.values().indexOf(e.variant.value).valueBy(BitMask.BIT).toByte().hex()},")
         // value
-        val value = (e.value.value?.toByte() ?: 0xFF).toByte()
-        logicData.append("${value.hex()},")
+//        val value = (e.value.value?.toByte() ?: 0xFF).toByte()
+//        logicData.append("${value.hex()},")
         // structure
         logicData.append(Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }
-                             .valueBy(BitMask.WORD).toByte().hex())
+            .valueBy(BitMask.WORD).toByte().hex())
 
-        if (value == (255).toByte()) {
-            logicData.append(",")
-            // player
-            logicData.append(
-                Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()
-                            )
-            logicData.append(
-                "\t; value, ${e.structure.value},  ${e.player.value} [enemy ${e.structure.value} value " + "copy to player]"
-                            )
-        } else {
-            logicData.append("\t; value, ${e.structure.value} [$value copy to player ${e.structure.value}]")
-        }
+        logicData.append("\t; Assign rival ${e.structure.value} value")
+//        if (value == (255).toByte()) {
+//            logicData.append(",")
+//            // player
+//            logicData.append(
+//                Player.values().indexOfFirst { it.name == e.player.value?.uppercase() }.toByte().hex()
+//            )
+//            logicData.append(
+//                "\t; value, ${e.structure.value},  ${e.player.value} [enemy ${e.structure.value} value " + "copy to player]"
+//            )
+//        } else {
+//            logicData.append("\t; value, ${e.structure.value} [$value copy to player ${e.structure.value}]")
+//        }
         logicCode.append("\n\tcall LOGIC.assign_calc")
     }
 
@@ -245,14 +251,14 @@ object PEffect {
                 addLog(
                     "Card effect is UNDEFINED for card: ${card?.cardName?.value?.uppercase()}. Effects: $eSize, Undefined: " + "$undefinedSize",
                     Color.Red
-                      )
+                )
             }
             var gCount = 0
             var aCount = 0
             var sCount = 0
             effects.forEach { e ->
                 when (e?.variant?.value) {
-                    Variant.GENERAL, Variant.GET_HALF -> {
+                    Variant.GENERAL -> {
                         general(e)
                         gCount++
                     }
@@ -262,9 +268,17 @@ object PEffect {
                         aCount++
                     }
 
-                    Variant.SWITCH, Variant.SEIZE, Variant.HIGHEST, Variant.LOWEST -> {
+                    Variant.SWITCH -> {
                         switch(e)
                         sCount++
+                    }
+
+                    Variant.HIGHEST -> {
+                        highest(e, "highest_calc")
+                    }
+
+                    Variant.LOWEST -> {
+                        highest(e, "lowest_calc")
                     }
 
                     else -> {}
@@ -283,21 +297,35 @@ object PEffect {
         }
     }
 
+    private fun highest(e: NewCard.Effect, call: String) {
+        // variant,structure
+        logicData.append("\n\tdb ")
+        // structure
+        logicData.append(
+            Structure.values().indexOfFirst { it.name == e.structure.value?.uppercase() }.valueBy(BitMask.WORD).toByte()
+                .hex()
+        )
+        val ending = if (e.structure.value?.endsWith("s") == true) "" else "`s"
+        logicData.append("\t; by Highest ${e.structure.value}$ending")
+        logicCode.append("\n\tcall LOGIC.$call")
+
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     //                                                                                         //
     //                                 C O N D I T I O N                                       //
     //                                                                                         //
     /////////////////////////////////////////////////////////////////////////////////////////////
-/*
-    signs:
-    <       ; true - <, false - >=
-    >       ; true - >, false - <=
-    ==      ; true - ==, false - !=
-    <=      ; true - <=, false - >
-    >=      ; true - >=, false - <
-    >!=     ; true - >, false - <, == none
-    <!=     ; true - <, false - >, == none
- */
+    /*
+        signs:
+        <       ; true - <, false - >=
+        >       ; true - >, false - <=
+        ==      ; true - ==, false - !=
+        <=      ; true - <=, false - >
+        >=      ; true - >=, false - <
+        >!=     ; true - >, false - <, == none
+        <!=     ; true - <, false - >, == none
+     */
     fun co(card: NewCard?, condition: MutableState<NewCard.Condition?>?, label: String) {
         if (condition?.value == null) return
         // value берется с rightPart value и rightPart не используется если value != 255
@@ -401,4 +429,78 @@ object PEffect {
 }
 
 
-// FIXME lucky cache не работает play again
+fun main() {
+    val p1 = List(5) { 1 }
+    val p2 = List(65) { 2 }
+    val p3 = List(32) { 3 }
+
+    val turns = 200
+    val difficulty = 1
+
+    val static = p1.plus(p2).plus(p3)
+    val cardsCount = static.size
+    val prob = p1.plus(p2).plus(p3).toMutableList()
+    val turnsArray = List(cardsCount) { 0 }.toMutableList()
+    val hits = List(cardsCount) { 0 }.toMutableList()
+
+
+    repeat(turns) {
+        while (true) {
+            val rId = Random.nextInt(cardsCount)
+            prob[rId]--
+
+            hits[rId]++
+            if (prob[rId] == 0) {
+                prob[rId] = static[rId]
+                turnsArray[rId]++
+                break
+            }
+        }
+    }
+
+    var t1 = 0
+    var t2 = 0
+    var t3 = 0
+
+    var h1 = 0
+    var h2 = 0
+    var h3 = 0
+
+    static.forEachIndexed { id, value ->
+        println("$value: ${hits[id]} | ${turnsArray[id]}")
+        when (value) {
+            1 -> {
+                t1 += turnsArray[id];h1 += hits[id]
+            }
+
+            2 -> {
+                t2 += turnsArray[id];h2 += hits[id]
+            }
+
+            3 -> {
+                t3 += turnsArray[id];h3 += hits[id]
+            }
+        }
+    }
+
+    val perc1 = static.count { it == 1 }.toFloat() * 100f / cardsCount.toFloat()
+    val perc2 = static.count { it == 2 }.toFloat() * 100f / cardsCount.toFloat()
+    val perc3 = static.count { it == 3 }.toFloat() * 100f / cardsCount.toFloat()
+
+
+    // TODO придумать рандом основываясь на вероятностях 1,2,3 без коэфициента
+
+    println(static.sumOf { it })
+//    println(static.reduce())
+    println()
+    println(perc1)
+    println(perc2)
+    println(perc3)
+    println()
+
+    println("Приоритет 1: Обращений = $h1 | Завершенных ходов = $t1")
+    println("Приоритет 2: Обращений = $h2 | Завершенных ходов = $t2")
+    println("Приоритет 3: Обращений = $h3 | Завершенных ходов = $t3")
+
+
+}
